@@ -247,15 +247,19 @@ export default function App() {
         )}
 
         {activeTab === "chat" && (
-          <>
-            <ChatInterface messages={messages} />
-            <div ref={chatEndRef} />
-          </>
+          <div className="flex flex-col h-[calc(100vh-140px)] pb-24">
+            <div className="flex-1 overflow-y-auto">
+              <ChatInterface messages={messages} />
+              <div ref={chatEndRef} />
+            </div>
+          </div>
         )}
       </main>
 
-      {/* Voice Input (Fixed Bottom) */}
-      <VoiceInput onVoiceCommand={handleVoiceCommand} />
+      {/* Voice Input (Fixed Bottom - Only in Chat Tab) */}
+      {activeTab === "chat" && (
+        <VoiceInput onVoiceCommand={handleVoiceCommand} />
+      )}
     </div>
   );
 }
