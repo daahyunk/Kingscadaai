@@ -88,8 +88,8 @@ export function SystemOverview({ pressure, isAlarmActive, alarmCount }: SystemOv
               )}
             </div>
             <div>
-              <h2 className={isAlarmActive ? 'text-red-300' : 'text-green-300'}>
-                {isAlarmActive ? '⚠️ 긴급 조치 필요' : '✓ 시스템 정상 운영'}
+              <h2 className={isAlarmActive ? 'font-semibold text-red-300' : 'text-green-300'}>
+                {isAlarmActive ? '긴급 조치 필요' : '시스템 정상 운영'}
               </h2>
               <p className="text-sm text-slate-400">
                 {new Date().toLocaleString('ko-KR', { 
@@ -111,8 +111,8 @@ export function SystemOverview({ pressure, isAlarmActive, alarmCount }: SystemOv
       {/* Pump System Image */}
       <div className="bg-slate-900/50 backdrop-blur border border-slate-800 rounded-xl overflow-hidden">
         <div className="p-4 border-b border-slate-800">
-          <h2 className="text-slate-300 flex items-center gap-2">
-            <Gauge className="w-5 h-5" />
+          <h2 className="text-slate-300 flex items-center gap-2 text-base font-semibold">
+            <Gauge className="w-[21px] h-[21극px]" />
             펌프 시스템 현황
           </h2>
         </div>
@@ -125,7 +125,7 @@ export function SystemOverview({ pressure, isAlarmActive, alarmCount }: SystemOv
           {/* Overlay indicators on pump 3 if alarm is active */}
           {isAlarmActive && (
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <div className="bg-red-600/90 backdrop-blur border border-red-400 rounded-lg px-4 py-2 flex items-center gap-2 shadow-lg">
+              <div className="bg-red-600/90 backdrop-blur border border-red-400 rounded-lg px-4 py-2 flex items-center gap-2 shadow-lg text-sm font-medium">
                 <AlertTriangle className="w-5 h-5 text-white animate-pulse" />
                 <span className="text-white">펌프 3 압력 이상</span>
               </div>
@@ -150,7 +150,7 @@ export function SystemOverview({ pressure, isAlarmActive, alarmCount }: SystemOv
                 <span className="text-slate-400 text-sm">{stat.label}</span>
               </div>
               <div className="flex items-baseline gap-1">
-                <span className={`text-2xl ${stat.color}`}>{stat.value}</span>
+                <span className={`text-2xl font-bold ${stat.color}`}>{stat.value}</span>
                 <span className="text-slate-500 text-sm">{stat.unit}</span>
               </div>
             </div>
@@ -160,7 +160,7 @@ export function SystemOverview({ pressure, isAlarmActive, alarmCount }: SystemOv
 
       {/* Equipment Status */}
       <div className="bg-slate-900/50 backdrop-blur border border-slate-800 rounded-xl p-4">
-        <h2 className="text-slate-300 mb-4 flex items-center gap-2">
+        <h2 className="text-slate-300 flex items-center gap-2 text-base font-semibold mb-4">
           <TrendingUp className="w-5 h-5" />
           실시간 장비 상태
         </h2>
@@ -175,11 +175,11 @@ export function SystemOverview({ pressure, isAlarmActive, alarmCount }: SystemOv
             const config = statusConfig[equipment.status as keyof typeof statusConfig];
 
             return (
-              <div 
+              <div
                 key={equipment.id}
-                className={`flex items-center justify-between p-3 rounded-lg border ${
-                  equipment.status === 'alarm' 
-                    ? 'bg-red-600/10 border-red-600/30' 
+                className={`flex items-center justify-between p-3 rounded-lg border border-red-600/30 transition-all ${
+                  equipment.status === 'alarm'
+                    ? 'animate-alarm-blink'
                     : 'bg-slate-800/50 border-slate-700'
                 }`}
               >
@@ -192,8 +192,8 @@ export function SystemOverview({ pressure, isAlarmActive, alarmCount }: SystemOv
                     <p className={`text-xs ${config.color}`}>{equipment.value}</p>
                   </div>
                 </div>
-                <div className={`w-2 h-2 rounded-full ${config.dot} ${
-                  equipment.status === 'alarm' ? 'animate-pulse' : ''
+                <div className={`w-3 h-3 rounded-full ${config.dot} ${
+                  equipment.status === 'alarm' ? 'animate-alarm-pulse shadow-lg shadow-red-500' : ''
                 }`} />
               </div>
             );

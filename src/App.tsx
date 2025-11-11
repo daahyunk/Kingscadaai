@@ -1,52 +1,55 @@
-import { useState, useEffect, useRef } from 'react';
-import { ChatInterface } from './components/ChatInterface';
-import { AlarmCard } from './components/AlarmCard';
-import { PumpStatus } from './components/PumpStatus';
-import { PressureChart } from './components/PressureChart';
-import { VoiceInput } from './components/VoiceInput';
-import { SystemOverview } from './components/SystemOverview';
-import { TabNavigation } from './components/TabNavigation';
-import { Activity, AlertCircle } from 'lucide-react';
+import { useState, useEffect, useRef } from "react";
+import { ChatInterface } from "./components/ChatInterface";
+import { AlarmCard } from "./components/AlarmCard";
+import { PumpStatus } from "./components/PumpStatus";
+import { PressureChart } from "./components/PressureChart";
+import { VoiceInput } from "./components/VoiceInput";
+import { SystemOverview } from "./components/SystemOverview";
+import { TabNavigation } from "./components/TabNavigation";
+import { AlertCircle } from "lucide-react";
 
-export type TabType = 'overview' | 'monitoring' | 'alarms' | 'chat';
+export type TabType = "overview" | "monitoring" | "alarms" | "chat";
 
 export interface Message {
   id: string;
-  type: 'user' | 'system' | 'alert';
+  type: "user" | "system" | "alert";
   content: string;
   timestamp: Date;
 }
 
 export interface AlarmData {
   id: string;
-  severity: 'critical' | 'warning' | 'info';
+  severity: "critical" | "warning" | "info";
   title: string;
   description: string;
   timestamp: Date;
-  status: 'active' | 'acknowledged' | 'resolved';
+  status: "active" | "acknowledged" | "resolved";
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: '1',
-      type: 'system',
-      content: 'KingSCADA AI 음성 어시스턴트가 준비되었습니다. 무엇을 도와드릴까요?',
-      timestamp: new Date()
-    }
+      id: "1",
+      type: "system",
+      content:
+        "KingSCADA AI 음성 어시스턴트가 준비되었습니다. 무엇을 도와드릴까요?",
+      timestamp: new Date(),
+    },
   ]);
 
   const [alarms, setAlarms] = useState<AlarmData[]>([]);
   const [pressure, setPressure] = useState(13.0);
   const [valvePosition, setValvePosition] = useState(100);
   const [isAlarmActive, setIsAlarmActive] = useState(false);
-  const [pressureHistory, setPressureHistory] = useState<Array<{ time: string; pressure: number }>>([
-    { time: '09:45', pressure: 13.0 },
-    { time: '10:00', pressure: 13.2 },
-    { time: '10:15', pressure: 13.8 },
-    { time: '10:30', pressure: 14.5 },
-    { time: '10:45', pressure: 15.5 }
+  const [pressureHistory, setPressureHistory] = useState<
+    Array<{ time: string; pressure: number }>
+  >([
+    { time: "09:45", pressure: 13.0 },
+    { time: "10:00", pressure: 13.2 },
+    { time: "10:15", pressure: 13.8 },
+    { time: "10:30", pressure: 14.5 },
+    { time: "10:45", pressure: 15.5 },
   ]);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -65,35 +68,36 @@ export default function App() {
     setIsAlarmActive(true);
 
     const alarm: AlarmData = {
-      id: 'alarm-' + Date.now(),
-      severity: 'critical',
-      title: '펌프 3번 압력 임계치 초과',
-      description: '현재 압력: 15.5 bar (임계치: 15.0 bar)',
+      id: "alarm-" + Date.now(),
+      severity: "critical",
+      title: "펌프 3번 압력 임계치 초과",
+      description: "현재 압력: 15.5 bar (임계치: 15.0 bar)",
       timestamp: new Date(),
-      status: 'active'
+      status: "active",
     };
 
     setAlarms([alarm]);
 
     const alertMessage: Message = {
-      id: 'msg-' + Date.now(),
-      type: 'alert',
-      content: '🚨 경고. 펌프 3번의 압력 15.5 bar, 임계치 초과. 긴급 조치가 필요합니다.',
-      timestamp: new Date()
+      id: "msg-" + Date.now(),
+      type: "alert",
+      content:
+        "🚨 경고. 펌프 3번의 압력 15.5 bar, 임계치 초과. 긴급 조치가 필요합니다.",
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, alertMessage]);
+    setMessages((prev) => [...prev, alertMessage]);
   };
 
   const handleVoiceCommand = (command: string) => {
     const userMessage: Message = {
-      id: 'msg-' + Date.now(),
-      type: 'user',
+      id: "msg-" + Date.now(),
+      type: "user",
       content: command,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
 
     // Process command
     setTimeout(() => {
@@ -102,102 +106,118 @@ export default function App() {
   };
 
   const processCommand = (command: string) => {
-    let response = '';
+    let response = "";
 
-    if (command.includes('추이') || command.includes('분석')) {
-      response = '최근 1시간 동안 압력이 13.0 bar에서 15.5 bar로 급격히 상승했습니다. 유량 센서 값은 정상입니다.';
-    } else if (command.includes('밸브') || command.includes('줄여')) {
+    if (command.includes("추이") || command.includes("분석")) {
+      response =
+        "최근 1시간 동안 압력이 13.0 bar에서 15.5 bar로 급격히 상승했습니다. 유량 센서 값은 정상입니다.";
+    } else if (command.includes("밸브") || command.includes("줄여")) {
       setValvePosition(50);
-      response = '밸브 V-102 조작 중. 현재 50%로 설정 완료. 압력 변화를 모니터링합니다.';
-      
+      response =
+        "밸브 V-102 조작 중. 현재 50%로 설정 완료. 압력 변화를 모니터링합니다.";
+
       // Simulate pressure decrease
       setTimeout(() => {
         setPressure(14.2);
-        setPressureHistory(prev => [...prev, { time: '10:50', pressure: 14.2 }]);
+        setPressureHistory((prev) => [
+          ...prev,
+          { time: "10:50", pressure: 14.2 },
+        ]);
       }, 1500);
 
       setTimeout(() => {
         setPressure(13.5);
-        setPressureHistory(prev => [...prev, { time: '10:55', pressure: 13.5 }]);
+        setPressureHistory((prev) => [
+          ...prev,
+          { time: "10:55", pressure: 13.5 },
+        ]);
         setIsAlarmActive(false);
-        
+
         // Update alarm status
-        setAlarms(prev => prev.map(alarm => ({ ...alarm, status: 'resolved' as const })));
-        
+        setAlarms((prev) =>
+          prev.map((alarm) => ({ ...alarm, status: "resolved" as const }))
+        );
+
         const normalMessage: Message = {
-          id: 'msg-' + Date.now(),
-          type: 'system',
-          content: '✅ 압력이 정상 범위로 회복되었습니다. (현재: 13.5 bar)',
-          timestamp: new Date()
+          id: "msg-" + Date.now(),
+          type: "system",
+          content: "✅ 압력이 정상 범위로 회복되었습니다. (현재: 13.5 bar)",
+          timestamp: new Date(),
         };
-        setMessages(prev => [...prev, normalMessage]);
+        setMessages((prev) => [...prev, normalMessage]);
       }, 3000);
-    } else if (command.includes('보고서')) {
-      response = '오늘 10시 45분 펌프 3번 압력 이상 조치 보고서를 PDF로 생성하여 관리자에게 자동 전송했습니다.';
-    } else if (command.includes('상태')) {
+    } else if (command.includes("보고서")) {
+      response =
+        "오늘 10시 45분 펌프 3번 압력 이상 조치 보고서를 PDF로 생성하여 관리자에게 자동 전송했습니다.";
+    } else if (command.includes("상태")) {
       response = `펌프 3번 현재 상태: 압력 ${pressure} bar, 밸브 V-102 위치 ${valvePosition}%`;
     } else {
-      response = '명령을 이해했습니다. 처리 중입니다.';
+      response = "명령을 이해했습니다. 처리 중입니다.";
     }
 
     const systemMessage: Message = {
-      id: 'msg-' + Date.now(),
-      type: 'system',
+      id: "msg-" + Date.now(),
+      type: "system",
       content: response,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, systemMessage]);
+    setMessages((prev) => [...prev, systemMessage]);
   };
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 pb-32">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-4 py-3">
+      <header className="sticky top-0 z-10 bg-slate-950 px-4 py-4">
         <div className="flex items-center justify-between max-w-6xl mx-auto">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Activity className="w-6 h-6" />
-            </div>
+          <div className="flex items-center gap-1">
+            <img
+              src="/logo.webp"
+              alt="KingSCADA Logo"
+              className="w-10 h-10 rounded-lg object-cover"
+            />
             <div>
-              <h1 className="text-white">KingSCADA AI</h1>
-              <p className="text-slate-400 text-sm">음성 어시스턴트</p>
+              <h1
+                className="text-white text-base font-geometric"
+                style={{
+                  fontFamily:
+                    "'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+                }}
+              >
+                <span className="font-bold">KingSCADA</span>{" "}
+                <span className="font-semibold">AI Assistant</span>
+              </h1>
+              {/* <p className="text-slate-400 text-sm">음성 어시스턴트</p> */}
             </div>
           </div>
-          {isAlarmActive && (
-            <div className="flex items-center gap-2 bg-red-600/20 text-red-400 px-3 py-1.5 rounded-lg border border-red-600/30">
-              <AlertCircle className="w-4 h-4 animate-pulse" />
-              <span className="text-sm">활성 알람</span>
-            </div>
-          )}
         </div>
       </header>
 
       {/* Tab Navigation */}
-      <TabNavigation 
-        activeTab={activeTab} 
+      <TabNavigation
+        activeTab={activeTab}
         onTabChange={setActiveTab}
-        alarmCount={alarms.filter(a => a.status === 'active').length}
+        alarmCount={alarms.filter((a) => a.status === "active").length}
       />
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 py-6 space-y-4">
-        {activeTab === 'overview' && (
-          <SystemOverview 
+      <main className="max-w-6xl mx-auto px-4 py-4 space-y-4">
+        {activeTab === "overview" && (
+          <SystemOverview
             pressure={pressure}
             valvePosition={valvePosition}
             isAlarmActive={isAlarmActive}
-            alarmCount={alarms.filter(a => a.status === 'active').length}
+            alarmCount={alarms.filter((a) => a.status === "active").length}
           />
         )}
 
-        {activeTab === 'monitoring' && (
+        {activeTab === "monitoring" && (
           <>
-            <PumpStatus 
+            <PumpStatus
               pressure={pressure}
               valvePosition={valvePosition}
               isAlarmActive={isAlarmActive}
@@ -206,13 +226,13 @@ export default function App() {
           </>
         )}
 
-        {activeTab === 'alarms' && (
+        {activeTab === "alarms" && (
           <div className="space-y-4">
             <div className="bg-slate-900/50 backdrop-blur border border-slate-800 rounded-xl p-4">
               <h2 className="text-slate-300 mb-4">알람 관리</h2>
               {alarms.length > 0 ? (
                 <div className="space-y-2">
-                  {alarms.map(alarm => (
+                  {alarms.map((alarm) => (
                     <AlarmCard key={alarm.id} alarm={alarm} />
                   ))}
                 </div>
@@ -226,7 +246,7 @@ export default function App() {
           </div>
         )}
 
-        {activeTab === 'chat' && (
+        {activeTab === "chat" && (
           <>
             <ChatInterface messages={messages} />
             <div ref={chatEndRef} />

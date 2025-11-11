@@ -7,13 +7,13 @@ interface ChatInterfaceProps {
 
 export function ChatInterface({ messages }: ChatInterfaceProps) {
   return (
-    <div className="bg-slate-900/50 backdrop-blur border border-slate-800 rounded-xl p-4 space-y-3">
-      <h2 className="text-slate-300 flex items-center gap-2">
+    <div className="space-y-3">
+      <h2 className="text-slate-300 flex items-center gap-2 text-sm mb-4">
         <Bot className="w-5 h-5" />
         대화 내역
       </h2>
-      
-      <div className="space-y-3 max-h-96 overflow-y-auto">
+
+      <div className="space-y-3 max-h-screen overflow-y-auto">
         {messages.map(message => (
           <div
             key={message.id}
@@ -45,7 +45,7 @@ export function ChatInterface({ messages }: ChatInterfaceProps) {
                   ? 'bg-red-600/20 text-red-300 border border-red-600/30'
                   : 'bg-slate-800 text-slate-200'
               }`}>
-                <p className="whitespace-pre-wrap">{message.content}</p>
+                <p className="whitespace-pre-wrap text-sm">{message.content}</p>
               </div>
               <p className="text-xs text-slate-500 mt-1 px-1">
                 {message.timestamp.toLocaleTimeString('ko-KR', {
