@@ -1,8 +1,6 @@
-import { 
-  Activity, 
-  Zap, 
-  Droplets, 
-  Thermometer, 
+import {
+  Droplets,
+  Thermometer,
   Wind,
   CheckCircle2,
   AlertTriangle,
@@ -11,7 +9,6 @@ import {
   Server,
   Gauge
 } from 'lucide-react';
-import pumpSystemImage from 'figma:asset/b5eeefe216bc06b4acaf356cf7ca178a3f875090.png';
 
 interface SystemOverviewProps {
   pressure: number;
@@ -20,7 +17,7 @@ interface SystemOverviewProps {
   alarmCount: number;
 }
 
-export function SystemOverview({ pressure, valvePosition, isAlarmActive, alarmCount }: SystemOverviewProps) {
+export function SystemOverview({ pressure, isAlarmActive, alarmCount }: SystemOverviewProps) {
   const stats = [
     { 
       label: '전체 장비', 
@@ -120,8 +117,8 @@ export function SystemOverview({ pressure, valvePosition, isAlarmActive, alarmCo
           </h2>
         </div>
         <div className="relative">
-          <img 
-            src={pumpSystemImage} 
+          <img
+            src="/pump.webp"
             alt="펌프 시스템"
             className="w-full h-auto"
           />
