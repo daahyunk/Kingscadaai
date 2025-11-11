@@ -20,7 +20,7 @@ export function TabNavigation({
   ];
 
   return (
-    <nav className="sticky top-[73px] z-20 bg-slate-950 border-b border-slate-700">
+    <nav className="sticky top-0 z-30 bg-slate-950 border-b border-slate-700">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-around">
           {tabs.map((tab) => {

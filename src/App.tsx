@@ -172,7 +172,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 pb-32">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-slate-950 px-4 py-4">
+      <header className="bg-slate-950 px-4 py-4">
         <div className="flex items-center justify-between max-w-6xl mx-auto">
           <div className="flex items-center gap-1">
             <img
