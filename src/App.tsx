@@ -3,6 +3,7 @@ import { ChatInterface } from "./components/ChatInterface";
 import { AlarmCard } from "./components/AlarmCard";
 import { PumpStatus } from "./components/PumpStatus";
 import { PressureChart } from "./components/PressureChart";
+import { MonitoringView } from "./components/MonitoringView";
 import { VoiceInput } from "./components/VoiceInput";
 import { SystemOverview } from "./components/SystemOverview";
 import { TabNavigation } from "./components/TabNavigation";
@@ -205,7 +206,7 @@ export default function App() {
       />
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 py-4 space-y-4">
+      <main className="max-w-6xl mx-auto px-6 py-6 space-y-4">
         {activeTab === "overview" && (
           <SystemOverview
             pressure={pressure}
@@ -216,14 +217,12 @@ export default function App() {
         )}
 
         {activeTab === "monitoring" && (
-          <>
-            <PumpStatus
-              pressure={pressure}
-              valvePosition={valvePosition}
-              isAlarmActive={isAlarmActive}
-            />
-            <PressureChart data={pressureHistory} threshold={15.0} />
-          </>
+          <MonitoringView
+            currentPressure={pressure}
+            valvePosition={valvePosition}
+            isAlarmActive={isAlarmActive}
+            pressureHistory={pressureHistory}
+          />
         )}
 
         {activeTab === "alarms" && (
