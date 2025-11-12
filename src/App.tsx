@@ -189,7 +189,7 @@ export default function App() {
                 }}
               >
                 <span className="font-bold">KingSCADA</span>{" "}
-                <span className="font-semibold">AI Assistant</span>
+                <span className="font-semibold">AI</span>
               </h1>
               {/* <p className="text-slate-400 text-sm">음성 어시스턴트</p> */}
             </div>
