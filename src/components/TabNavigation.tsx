@@ -24,6 +24,7 @@ export function TabNavigation({
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-around">
           {tabs.map((tab) => {
+            
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
 
