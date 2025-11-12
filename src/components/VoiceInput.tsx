@@ -106,6 +106,7 @@ export function VoiceInput({ onVoiceCommand }: VoiceInputProps) {
                 onKeyPress={handleKeyPress}
                 placeholder="음성 명령 또는 텍스트 입력..."
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none"
+                style={{ fontSize: '16px' }}
               />
             </div>
 
