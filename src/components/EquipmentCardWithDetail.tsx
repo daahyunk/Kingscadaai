@@ -21,6 +21,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Equipment {
   id: number;
@@ -65,6 +66,7 @@ export function EquipmentCardWithDetail({
   additionalParams,
   aiRecommendation,
 }: EquipmentCardWithDetailProps) {
+  const { t } = useTranslation(["monitoring", "common"]);
   const [showAIRecommendation, setShowAIRecommendation] = useState(false);
 
   const getIcon = (type: string) => {
@@ -88,21 +90,21 @@ export function EquipmentCardWithDetail({
       bg: "bg-green-600/10",
       border: "border-slate-700",
       dot: "bg-green-500",
-      label: "정상",
+      label: t("common:normal"),
     },
     alarm: {
       color: "text-red-400",
       bg: "bg-red-600/10",
       border: "border-red-600/30",
       dot: "bg-red-500",
-      label: "경고",
+      label: t("common:warning"),
     },
     offline: {
       color: "text-slate-500",
       bg: "bg-slate-600/10",
       border: "border-slate-700",
       dot: "bg-slate-500",
-      label: "오프라인",
+      label: t("common:offline"),
     },
   };
 
@@ -136,7 +138,7 @@ export function EquipmentCardWithDetail({
                   {equipment.status === "alarm" && aiRecommendation && (
                     <div className="flex items-center gap-1 px-2 py-0.5 bg-purple-600/20 rounded-full">
                       <Sparkles className="w-3 h-3 text-purple-400" />
-                      <span className="text-xs text-purple-400">AI 조치</span>
+                      <span className="text-xs text-purple-400">{t("monitoring:aiMeasures")}</span>
                     </div>
                   )}
                 </div>
@@ -206,7 +208,7 @@ export function EquipmentCardWithDetail({
                 </div>
                 {equipment.threshold && (
                   <div className="mt-2 text-xs text-slate-400">
-                    임계치 - {equipment.threshold} {equipment.unit}
+                    {t("common:threshold")} - {equipment.threshold} {equipment.unit}
                   </div>
                 )}
               </div>
@@ -246,7 +248,7 @@ export function EquipmentCardWithDetail({
           <div className="p-4">
             <h4 className="text-slate-300 text-sm mb-3 flex items-center gap-2 font-semibold">
               <TrendingUp className="w-4 h-4" />
-              추이 분석 (최근 1시간)
+              {t("monitoring:trendAnalysis")}
             </h4>
 
             <div style={{ height: "250px", width: "100%" }}>
@@ -290,7 +292,7 @@ export function EquipmentCardWithDetail({
                       stroke="#ef4444"
                       strokeDasharray="3 3"
                       label={{
-                        value: "임계치",
+                        value: t("common:threshold"),
                         fill: "#ef4444",
                         fontSize: 11,
                         position: "right",
@@ -312,7 +314,7 @@ export function EquipmentCardWithDetail({
             <div className="mt-3 flex items-center justify-center gap-4 text-xs">
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                <span className="text-slate-400">측정값</span>
+                <span className="text-slate-400">{t("monitoring:measurementValue")}</span>
               </div>
               {equipment.threshold && (
                 <div className="flex items-center gap-1.5">
@@ -320,7 +322,7 @@ export function EquipmentCardWithDetail({
                     className="w-6 h-0.5 bg-red-500"
                     style={{ borderTop: "2px dashed" }}
                   />
-                  <span className="text-slate-400">임계치</span>
+                  <span className="text-slate-400">{t("monitoring:thresholdLabel")}</span>
                 </div>
               )}
             </div>
@@ -342,11 +344,11 @@ export function EquipmentCardWithDetail({
                   </div>
                   <div className="text-left">
                     <p className="text-sm text-purple-300 font-semibold">
-                      AI 추천 조치
+                      {t("common:aiRecommendedActions")}
                     </p>
                     <p className="text-xs text-purple-400/70">
                       {aiRecommendation.steps.filter((s) => s.completed).length}
-                      /{aiRecommendation.steps.length} 단계 완료
+                      /{aiRecommendation.steps.length} {t("common:stepsCompleted")}
                     </p>
                   </div>
                 </div>
@@ -361,10 +363,10 @@ export function EquipmentCardWithDetail({
                     }`}
                   >
                     {aiRecommendation.priority === "high"
-                      ? "긴급"
+                      ? t("common:urgent")
                       : aiRecommendation.priority === "medium"
-                      ? "주의"
-                      : "일반"}
+                      ? t("common:caution")
+                      : t("common:general")}
                   </span>
                   <ChevronDown
                     className={`w-4 h-4 text-purple-400 transition-transform ${
@@ -425,7 +427,7 @@ export function EquipmentCardWithDetail({
                   <div className="mt-3 flex items-center gap-2 text-xs text-purple-400/70 bg-purple-600/5 p-2 rounded-lg">
                     <AlertTriangle className="w-3 h-3" />
                     <span>
-                      AI가 실시간 데이터를 분석하여 최적의 조치를 제안합니다
+                      {t("monitoring:AIOptimalMeasures")}
                     </span>
                   </div>
                 </div>

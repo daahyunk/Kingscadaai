@@ -1,23 +1,25 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Mic, Send, Sparkles } from "lucide-react";
 import { Button } from "./ui/button";
+import { useTranslation } from "react-i18next";
 
 interface VoiceInputProps {
   onVoiceCommand: (command: string) => void;
 }
 
-const quickCommands = [
-  "펌프 3번, 최근 1시간 추이 분석해 줘",
-  "펌프 3번의 공급 밸브(V-102) 50% 줄여",
-  "펌프 3번 상황 정상화 보고서 생성해 줘",
-  "펌프 3번 현재 상태 알려줘",
-];
-
 export function VoiceInput({ onVoiceCommand }: VoiceInputProps) {
+  const { t } = useTranslation('chat');
   const [isListening, setIsListening] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [showQuickCommands, setShowQuickCommands] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const quickCommands = [
+    t('quickCommand1'),
+    t('quickCommand2'),
+    t('quickCommand3'),
+    t('quickCommand4'),
+  ];
 
   const handleMicClick = () => {
     setIsListening(!isListening);
@@ -66,7 +68,7 @@ export function VoiceInput({ onVoiceCommand }: VoiceInputProps) {
             <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 shadow-2xl">
               <div className="flex items-center gap-2 text-slate-300 mb-3">
                 <Sparkles className="w-4 h-4" />
-                <span className="text-sm">빠른 명령어</span>
+                <span className="text-sm">{t('common:voiceCommands')}</span>
               </div>
               <div className="space-y-2">
                 {quickCommands.map((command, index) => (
@@ -104,7 +106,7 @@ export function VoiceInput({ onVoiceCommand }: VoiceInputProps) {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="음성 명령 또는 텍스트 입력..."
+                placeholder={t('common:inputPlaceholder')}
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none"
                 style={{ fontSize: '16px' }}
               />
@@ -138,7 +140,7 @@ export function VoiceInput({ onVoiceCommand }: VoiceInputProps) {
             <div className="mt-3 text-center">
               <div className="inline-flex items-center gap-2 bg-red-600/20 border border-red-600/30 text-red-400 px-4 py-2 rounded-lg">
                 <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                <span className="text-sm">음성 인식 중...</span>
+                <span className="text-sm">{t('common:voiceRecognizing')}</span>
               </div>
             </div>
           )}

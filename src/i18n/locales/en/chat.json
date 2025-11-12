@@ -1,0 +1,23 @@
+{
+  "tabName": "Chat",
+  "chatInterface": "Chat Interface",
+  "voiceAssistant": "Voice Assistant",
+  "startVoiceInput": "Start Voice Input",
+  "stopVoiceInput": "Stop Voice Input",
+  "send": "Send",
+  "voiceInputReady": "Voice input is ready",
+  "voiceInputListening": "Voice input is listening",
+  "voiceInputError": "Voice input error",
+  "assistantGreeting": "KingSCADA AI voice assistant is ready. How can I help you?",
+  "typePlaceholder": "Type your message...",
+  "noMessages": "No messages",
+  "you": "You",
+  "assistant": "Assistant",
+  "thinking": "Thinking...",
+  "networkError": "Network error",
+  "tryAgain": "Try again",
+  "quickCommand1": "Pump 3, analyze recent 1 hour trend",
+  "quickCommand2": "Pump 3 supply valve (V-102) reduce by 50%",
+  "quickCommand3": "Pump 3 generate situation report",
+  "quickCommand4": "Tell me current Pump 3 status"
+}

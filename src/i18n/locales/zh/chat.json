@@ -1,0 +1,23 @@
+{
+  "tabName": "聊天",
+  "chatInterface": "聊天界面",
+  "voiceAssistant": "语音助手",
+  "startVoiceInput": "开始语音输入",
+  "stopVoiceInput": "停止语音输入",
+  "send": "发送",
+  "voiceInputReady": "语音输入已准备好",
+  "voiceInputListening": "正在监听语音输入",
+  "voiceInputError": "语音输入错误",
+  "assistantGreeting": "KingSCADA AI语音助手已准备好。我能为您做什么?",
+  "typePlaceholder": "输入您的消息...",
+  "noMessages": "没有消息",
+  "you": "您",
+  "assistant": "助手",
+  "thinking": "思考中...",
+  "networkError": "网络错误",
+  "tryAgain": "重试",
+  "quickCommand1": "泵 3, 分析最近 1 小时的趋势",
+  "quickCommand2": "泵 3 的供应阀 (V-102) 减少 50%",
+  "quickCommand3": "泵 3 生成情况报告",
+  "quickCommand4": "告诉我泵 3 的当前状态"
+}

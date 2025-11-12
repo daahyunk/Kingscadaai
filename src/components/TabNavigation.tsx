@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { TabType } from "../App";
 import { LayoutDashboard, Activity, Bell, MessageSquare } from "lucide-react";
 
@@ -12,11 +13,13 @@ export function TabNavigation({
   onTabChange,
   alarmCount,
 }: TabNavigationProps) {
+  const { t } = useTranslation();
+
   const tabs = [
-    { id: "overview" as TabType, label: "개요", icon: LayoutDashboard },
-    { id: "monitoring" as TabType, label: "모니터링", icon: Activity },
-    { id: "alarms" as TabType, label: "알람", icon: Bell, badge: alarmCount },
-    { id: "chat" as TabType, label: "대화", icon: MessageSquare },
+    { id: "overview" as TabType, label: t("overview:tabName"), icon: LayoutDashboard },
+    { id: "monitoring" as TabType, label: t("monitoring:tabName"), icon: Activity },
+    { id: "alarms" as TabType, label: t("alarms:tabName"), icon: Bell, badge: alarmCount },
+    { id: "chat" as TabType, label: t("chat:tabName"), icon: MessageSquare },
   ];
 
   return (

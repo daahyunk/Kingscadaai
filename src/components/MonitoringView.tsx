@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { EquipmentCardWithDetail } from "./EquipmentCardWithDetail";
 import { Search, Filter, AlertCircle } from "lucide-react";
 
@@ -25,6 +26,7 @@ export function MonitoringView({
   isAlarmActive,
   pressureHistory,
 }: MonitoringViewProps) {
+  const { t } = useTranslation(["monitoring", "common"]);
   const [selectedEquipmentId, setSelectedEquipmentId] = useState<number | null>(
     3
   );
@@ -54,7 +56,7 @@ export function MonitoringView({
   const allEquipment: Equipment[] = [
     {
       id: 1,
-      name: "펌프 1",
+      name: t("monitoring:pump1"),
       type: "pump",
       status: "online",
       value: 13.2,
@@ -63,7 +65,7 @@ export function MonitoringView({
     },
     {
       id: 2,
-      name: "펌프 2",
+      name: t("monitoring:pump2"),
       type: "pump",
       status: "online",
       value: 14.1,
@@ -72,7 +74,7 @@ export function MonitoringView({
     },
     {
       id: 3,
-      name: "펌프 3",
+      name: t("monitoring:pump3"),
       type: "pump",
       status: isAlarmActive ? "alarm" : "online",
       value: currentPressure,
@@ -81,7 +83,7 @@ export function MonitoringView({
     },
     {
       id: 4,
-      name: "펌프 4",
+      name: t("monitoring:pump4"),
       type: "pump",
       status: "online",
       value: 13.8,
@@ -90,7 +92,7 @@ export function MonitoringView({
     },
     {
       id: 5,
-      name: "온도 센서 A",
+      name: t("monitoring:temperatureSensorA"),
       type: "temperature",
       status: "online",
       value: 23.5,
@@ -99,7 +101,7 @@ export function MonitoringView({
     },
     {
       id: 6,
-      name: "온도 센서 B",
+      name: t("monitoring:temperatureSensorB"),
       type: "temperature",
       status: "online",
       value: 24.2,
@@ -108,7 +110,7 @@ export function MonitoringView({
     },
     {
       id: 7,
-      name: "유량계 1",
+      name: t("monitoring:flowMeter1"),
       type: "flow",
       status: "online",
       value: 150,
@@ -116,7 +118,7 @@ export function MonitoringView({
     },
     {
       id: 8,
-      name: "유량계 2",
+      name: t("monitoring:flowMeter2"),
       type: "flow",
       status: "online",
       value: 145,
@@ -124,7 +126,7 @@ export function MonitoringView({
     },
     {
       id: 9,
-      name: "압력 센서 A",
+      name: t("monitoring:pressureSensorA"),
       type: "pressure",
       status: "online",
       value: 12.8,
@@ -133,7 +135,7 @@ export function MonitoringView({
     },
     {
       id: 10,
-      name: "압력 센서 B",
+      name: t("monitoring:pressureSensorB"),
       type: "pressure",
       status: "online",
       value: 13.4,
@@ -142,7 +144,7 @@ export function MonitoringView({
     },
     {
       id: 11,
-      name: "압력 센서 C",
+      name: t("monitoring:pressureSensorC"),
       type: "pressure",
       status: "online",
       value: 14.0,
@@ -151,7 +153,7 @@ export function MonitoringView({
     },
     {
       id: 12,
-      name: "압력 센서 D",
+      name: t("monitoring:pressureSensorD"),
       type: "pressure",
       status: "online",
       value: 13.1,
@@ -191,7 +193,7 @@ export function MonitoringView({
     if (equipmentId === 3) {
       return [
         {
-          label: "밸브 V-102",
+          label: t("monitoring:valveAdjustment").split(" ")[1], // "밸브 V-102"
           value: valvePosition.toString(),
           unit: "%",
         },
@@ -207,28 +209,26 @@ export function MonitoringView({
         steps: [
           {
             step: 1,
-            title: "압력 추이 분석",
-            description:
-              "최근 1시간 동안 압력이 13.0 → 15.5 bar로 급격히 상승. 유량은 정상 범위",
+            title: t("monitoring:pressureAnalysis"),
+            description: t("monitoring:pressureAnalysisDescription"),
             completed: true,
           },
           {
             step: 2,
-            title: "밸브 V-102 조정",
-            description: "현재 100% 개방 상태. 50%로 조정하여 압력 감소 필요",
+            title: t("monitoring:valveAdjustment"),
+            description: t("monitoring:valveAdjustmentDescription"),
             completed: valvePosition === 50,
           },
           {
             step: 3,
-            title: "압력 안정화 모니터링",
-            description:
-              "밸브 조정 후 5-10분간 압력 변화 관찰 (목표: 13-14 bar)",
+            title: t("monitoring:pressureStabilization"),
+            description: t("monitoring:pressureStabilizationDescription"),
             completed: false,
           },
           {
             step: 4,
-            title: "상황 보고서 작성",
-            description: "조치 완료 후 PDF 보고서 생성 및 관리자 전송",
+            title: t("monitoring:reportGeneration"),
+            description: t("monitoring:reportGenerationDescription"),
             completed: false,
           },
         ],
@@ -251,29 +251,29 @@ export function MonitoringView({
   });
 
   const filterButtons = [
-    { label: "전체", value: "all", count: allEquipment.length },
+    { label: t("monitoring:allFilter"), value: "all", count: allEquipment.length },
     {
-      label: "경고",
+      label: t("monitoring:warningFilter"),
       value: "alarm",
       count: allEquipment.filter((e) => e.status === "alarm").length,
     },
     {
-      label: "펌프",
+      label: t("monitoring:pumpFilter"),
       value: "pump",
       count: allEquipment.filter((e) => e.type === "pump").length,
     },
     {
-      label: "온도",
+      label: t("monitoring:temperatureFilter"),
       value: "temperature",
       count: allEquipment.filter((e) => e.type === "temperature").length,
     },
     {
-      label: "유량",
+      label: t("monitoring:flowFilter"),
       value: "flow",
       count: allEquipment.filter((e) => e.type === "flow").length,
     },
     {
-      label: "압력",
+      label: t("monitoring:pressureFilter"),
       value: "pressure",
       count: allEquipment.filter((e) => e.type === "pressure").length,
     },
@@ -290,7 +290,7 @@ export function MonitoringView({
           {/* className={`flex items-center justify-between mb-2 ${
             isSticky ? "pt-12" : ""
           }`} */}
-          <h2 className="text-slate-300 font-semibold">전체 장비</h2>
+          <h2 className="text-slate-300 font-semibold">{t("monitoring:allFilter")} {t("common:equipmentType")}</h2>
           <span className="text-sm text-slate-500 font-medium tracking-tighter">
             {filteredEquipment.length}개
           </span>
@@ -301,7 +301,7 @@ export function MonitoringView({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-500" />
           <input
             type="text"
-            placeholder="장비를 검색해보세요"
+            placeholder={t("common:searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-slate-800 border border-slate-700 rounded-lg pl-8  py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
@@ -359,7 +359,7 @@ export function MonitoringView({
         ) : (
           <div className="text-center py-12 text-slate-500">
             <Search className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p>검색 결과가 없습니다</p>
+            <p>{t("common:noResults")}</p>
           </div>
         )}
       </div>

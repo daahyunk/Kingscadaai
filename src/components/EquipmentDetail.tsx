@@ -15,6 +15,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
+import { useTranslation } from "react-i18next";
 
 interface Equipment {
   id: number;
@@ -37,6 +38,8 @@ export function EquipmentDetail({
   historyData,
   additionalParams,
 }: EquipmentDetailProps) {
+  const { t } = useTranslation(["monitoring", "common"]);
+
   const statusConfig = {
     online: {
       color: "text-green-400",
@@ -57,15 +60,15 @@ export function EquipmentDetail({
   const getTypeLabel = (type: string) => {
     switch (type) {
       case "pump":
-        return "펌프";
+        return t("common:pumpType");
       case "temperature":
-        return "온도 센서";
+        return t("common:temperatureSensor");
       case "flow":
-        return "유량계";
+        return t("common:flowMeter");
       case "pressure":
-        return "압력 센서";
+        return t("common:pressureSensor");
       default:
-        return "장비";
+        return t("common:equipmentType");
     }
   };
 
@@ -81,7 +84,7 @@ export function EquipmentDetail({
                 ({getTypeLabel(equipment.type)})
               </span>
             </div>
-            <p className="text-xs text-slate-500">장비 ID: {equipment.id}</p>
+            <p className="text-xs text-slate-500">{t("monitoring:equipmentId")}: {equipment.id}</p>
           </div>
           <div
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${config.bg}`}
@@ -89,10 +92,10 @@ export function EquipmentDetail({
             <StatusIcon className={`w-4 h-4 ${config.color}`} />
             <span className={`text-sm ${config.color}`}>
               {equipment.status === "online"
-                ? "정상"
+                ? t("common:normal")
                 : equipment.status === "alarm"
-                ? "경고"
-                : "오프라인"}
+                ? t("common:warning")
+                : t("common:offline")}
             </span>
           </div>
         </div>
@@ -102,7 +105,7 @@ export function EquipmentDetail({
           <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
             <div className="flex items-center gap-2 text-slate-400 text-sm mb-2">
               <Gauge className="w-4 h-4" />
-              <span>현재 값</span>
+              <span>{t("common:currentValue")}</span>
             </div>
             <div className="flex items-baseline gap-1">
               <span className={`text-3xl ${config.color}`}>
@@ -112,7 +115,7 @@ export function EquipmentDetail({
             </div>
             {equipment.threshold && (
               <div className="mt-2 text-xs text-slate-500">
-                임계치: {equipment.threshold} {equipment.unit}
+                {t("common:threshold")}: {equipment.threshold} {equipment.unit}
               </div>
             )}
           </div>
@@ -149,7 +152,7 @@ export function EquipmentDetail({
               equipment.status === "alarm" ? "text-red-400" : "text-green-400"
             }
           >
-            {equipment.status === "alarm" ? "⚠️ 조치 필요" : "✓ 정상 운영"}
+            {equipment.status === "alarm" ? t("common:actionNeeded") : t("common:normalOperation")}
           </span>
           <div
             className={`w-2 h-2 rounded-full ${
@@ -165,7 +168,7 @@ export function EquipmentDetail({
       <div className="bg-slate-900/50 backdrop-blur border border-slate-800 rounded-xl p-4">
         <h3 className="text-slate-300 mb-4 flex items-center gap-2">
           <TrendingUp className="w-5 h-5" />
-          추이 분석 (최근 1시간)
+          {t("monitoring:trendAnalysis")}
         </h3>
 
         <div style={{ height: "300px", width: "100%" }}>
@@ -208,7 +211,7 @@ export function EquipmentDetail({
                   stroke="#ef4444"
                   strokeDasharray="3 3"
                   label={{
-                    value: "임계치",
+                    value: t("common:threshold"),
                     fill: "#ef4444",
                     fontSize: 12,
                     position: "right",
@@ -231,9 +234,7 @@ export function EquipmentDetail({
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-blue-500" />
             <span className="text-slate-400">
-              {equipment.unit === "bar" || equipment.unit === "°C"
-                ? "값"
-                : "유량"}
+              {t("monitoring:measurementValue")}
             </span>
           </div>
           {equipment.threshold && (
@@ -242,7 +243,7 @@ export function EquipmentDetail({
                 className="w-8 h-0.5 bg-red-500"
                 style={{ borderTop: "2px dashed" }}
               />
-              <span className="text-slate-400">임계치</span>
+              <span className="text-slate-400">{t("monitoring:thresholdLabel")}</span>
             </div>
           )}
         </div>

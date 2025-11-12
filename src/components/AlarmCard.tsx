@@ -1,11 +1,23 @@
 import { AlarmData } from '../App';
 import { AlertTriangle, AlertCircle, Info, CheckCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface AlarmCardProps {
   alarm: AlarmData;
 }
 
 export function AlarmCard({ alarm }: AlarmCardProps) {
+  const { t, i18n } = useTranslation('alarms');
+
+  // i18n 언어 코드를 locale 형식으로 변환
+  const getLocale = () => {
+    const langMap: Record<string, string> = {
+      ko: "ko-KR",
+      en: "en-US",
+      zh: "zh-CN",
+    };
+    return langMap[i18n.language] || "ko-KR";
+  };
   const severityConfig = {
     critical: {
       icon: AlertTriangle,
@@ -34,9 +46,25 @@ export function AlarmCard({ alarm }: AlarmCardProps) {
   const Icon = config.icon;
 
   const statusConfig = {
-    active: { text: '활성', color: 'text-red-400' },
-    acknowledged: { text: '확인됨', color: 'text-yellow-400' },
-    resolved: { text: '해결됨', color: 'text-green-400' }
+    active: { text: t('alarmStatus_active'), color: 'text-red-400' },
+    acknowledged: { text: t('alarmStatus_acknowledged'), color: 'text-yellow-400' },
+    resolved: { text: t('alarmStatus_resolved'), color: 'text-green-400' }
+  };
+
+  // 제목 번역하기
+  const getTitle = () => {
+    if (alarm.titleKey) {
+      return `${t("pump3_prefix")} ${t("exceedsThreshold")}`;
+    }
+    return alarm.title;
+  };
+
+  // 설명 번역하기
+  const getDescription = () => {
+    if (alarm.descriptionKey) {
+      return t(alarm.descriptionKey.replace("alarms:", ""), alarm.descriptionParams);
+    }
+    return alarm.description;
   };
 
   return (
@@ -45,11 +73,11 @@ export function AlarmCard({ alarm }: AlarmCardProps) {
         <div className={`${config.iconBg} ${config.textColor} p-2.5 rounded-lg`}>
           <Icon className="w-5 h-5" />
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-1">
             <h3 className={`${config.textColor}`}>
-              {alarm.title}
+              {getTitle()}
             </h3>
             <div className="flex items-center gap-1.5">
               {alarm.status === 'resolved' && (
@@ -60,13 +88,13 @@ export function AlarmCard({ alarm }: AlarmCardProps) {
               </span>
             </div>
           </div>
-          
+
           <p className="text-slate-300 text-sm mb-2">
-            {alarm.description}
+            {getDescription()}
           </p>
           
           <p className="text-xs text-slate-500">
-            {alarm.timestamp.toLocaleTimeString('ko-KR', {
+            {alarm.timestamp.toLocaleTimeString(getLocale(), {
               hour: '2-digit',
               minute: '2-digit',
               second: '2-digit'

@@ -1,16 +1,29 @@
 import { Message } from "../App";
 import { Bot, User, AlertTriangle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface ChatInterfaceProps {
   messages: Message[];
 }
 
 export function ChatInterface({ messages }: ChatInterfaceProps) {
+  const { t, i18n } = useTranslation(["chat", "common"]);
+
+  // i18n 언어 코드를 locale 형식으로 변환
+  const getLocale = () => {
+    const langMap: Record<string, string> = {
+      ko: "ko-KR",
+      en: "en-US",
+      zh: "zh-CN",
+    };
+    return langMap[i18n.language] || "ko-KR";
+  };
+
   return (
     <div className="space-y-3">
       <h2 className="text-slate-300 flex items-center gap-2 text-sm mb-4">
         <Bot className="w-5 h-5" />
-        대화 내역
+        {t("common:chatHistory")}
       </h2>
 
       <div className="space-y-3">
@@ -56,7 +69,7 @@ export function ChatInterface({ messages }: ChatInterfaceProps) {
                 <p className="whitespace-pre-wrap text-sm">{message.content}</p>
               </div>
               <p className="text-xs text-slate-500 mt-1 px-1">
-                {message.timestamp.toLocaleTimeString("ko-KR", {
+                {message.timestamp.toLocaleTimeString(getLocale(), {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { ChatInterface } from "./components/ChatInterface";
 import { AlarmCard } from "./components/AlarmCard";
 import { PumpStatus } from "./components/PumpStatus";
@@ -7,7 +8,7 @@ import { MonitoringView } from "./components/MonitoringView";
 import { VoiceInput } from "./components/VoiceInput";
 import { SystemOverview } from "./components/SystemOverview";
 import { TabNavigation } from "./components/TabNavigation";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Globe } from "lucide-react";
 
 export type TabType = "overview" | "monitoring" | "alarms" | "chat";
 
@@ -25,16 +26,20 @@ export interface AlarmData {
   description: string;
   timestamp: Date;
   status: "active" | "acknowledged" | "resolved";
+  titleKey?: string;
+  descriptionKey?: string;
+  descriptionParams?: Record<string, string | number>;
 }
 
 export default function App() {
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabType>("overview");
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
       type: "system",
-      content:
-        "KingSCADA AI 음성 어시스턴트가 준비되었습니다. 무엇을 도와드릴까요?",
+      content: t("chat:assistantGreeting"),
       timestamp: new Date(),
     },
   ]);
@@ -71,10 +76,13 @@ export default function App() {
     const alarm: AlarmData = {
       id: "alarm-" + Date.now(),
       severity: "critical",
-      title: "펌프 3번 압력 임계치 초과",
-      description: "현재 압력: 15.5 bar (임계치: 15.0 bar)",
+      title: `${t("alarms:pump3_prefix")} ${t("alarms:exceedsThreshold")}`,
+      description: t("alarms:alarmDescription_pressure", { pressure: 15.5, threshold: 15.0 }),
       timestamp: new Date(),
       status: "active",
+      titleKey: "alarmTitle_pump3",
+      descriptionKey: "alarms:alarmDescription_pressure",
+      descriptionParams: { pressure: 15.5, threshold: 15.0 }
     };
 
     setAlarms([alarm]);
@@ -82,8 +90,7 @@ export default function App() {
     const alertMessage: Message = {
       id: "msg-" + Date.now(),
       type: "alert",
-      content:
-        "🚨 경고. 펌프 3번의 압력 15.5 bar, 임계치 초과. 긴급 조치가 필요합니다.",
+      content: t("alarms:alarmMessage", { pressure: 15.5 }),
       timestamp: new Date(),
     };
 
@@ -110,12 +117,10 @@ export default function App() {
     let response = "";
 
     if (command.includes("추이") || command.includes("분석")) {
-      response =
-        "최근 1시간 동안 압력이 13.0 bar에서 15.5 bar로 급격히 상승했습니다. 유량 센서 값은 정상입니다.";
+      response = t("alarms:pressureAnalysisResponse");
     } else if (command.includes("밸브") || command.includes("줄여")) {
       setValvePosition(50);
-      response =
-        "밸브 V-102 조작 중. 현재 50%로 설정 완료. 압력 변화를 모니터링합니다.";
+      response = t("alarms:valveOperationResponse");
 
       // Simulate pressure decrease
       setTimeout(() => {
@@ -142,18 +147,17 @@ export default function App() {
         const normalMessage: Message = {
           id: "msg-" + Date.now(),
           type: "system",
-          content: "✅ 압력이 정상 범위로 회복되었습니다. (현재: 13.5 bar)",
+          content: t("alarms:pressureRecoveryMessage", { pressure: 13.5 }),
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, normalMessage]);
       }, 3000);
     } else if (command.includes("보고서")) {
-      response =
-        "오늘 10시 45분 펌프 3번 압력 이상 조치 보고서를 PDF로 생성하여 관리자에게 자동 전송했습니다.";
+      response = t("alarms:reportGenerationResponse");
     } else if (command.includes("상태")) {
-      response = `펌프 3번 현재 상태: 압력 ${pressure} bar, 밸브 V-102 위치 ${valvePosition}%`;
+      response = t("alarms:statusQueryResponse", { pressure: pressure.toFixed(1), position: valvePosition });
     } else {
-      response = "명령을 이해했습니다. 처리 중입니다.";
+      response = t("alarms:commandDefaultResponse");
     }
 
     const systemMessage: Message = {
@@ -170,10 +174,16 @@ export default function App() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const handleLanguageChange = (lang: string) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem("language", lang);
+    setShowLanguageMenu(false);
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 pb-32">
       {/* Header */}
-      <header className="bg-slate-950 px-4 py-4">
+      <header className="bg-slate-950 px-4 py-4 border-b border-slate-800">
         <div className="flex items-center justify-between max-w-6xl mx-auto">
           <div className="flex items-center gap-1">
             <img
@@ -194,6 +204,52 @@ export default function App() {
               </h1>
               {/* <p className="text-slate-400 text-sm">음성 어시스턴트</p> */}
             </div>
+          </div>
+
+          {/* Language Selector */}
+          <div className="relative">
+            <button
+              onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors text-slate-300 text-sm"
+            >
+              <Globe className="w-4 h-4" />
+              <span className="uppercase">{i18n.language}</span>
+            </button>
+
+            {showLanguageMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-slate-800 rounded-lg border border-slate-700 shadow-lg z-50">
+                <button
+                  onClick={() => handleLanguageChange("ko")}
+                  className={`w-full text-left px-4 py-2 text-sm ${
+                    i18n.language === "ko"
+                      ? "bg-blue-600 text-white"
+                      : "hover:bg-slate-700 text-slate-300"
+                  } first:rounded-t-lg`}
+                >
+                  🇰🇷 {t("common:korean")}
+                </button>
+                <button
+                  onClick={() => handleLanguageChange("en")}
+                  className={`w-full text-left px-4 py-2 text-sm border-t border-slate-700 ${
+                    i18n.language === "en"
+                      ? "bg-blue-600 text-white"
+                      : "hover:bg-slate-700 text-slate-300"
+                  }`}
+                >
+                  🇬🇧 {t("common:english")}
+                </button>
+                <button
+                  onClick={() => handleLanguageChange("zh")}
+                  className={`w-full text-left px-4 py-2 text-sm border-t border-slate-700 ${
+                    i18n.language === "zh"
+                      ? "bg-blue-600 text-white"
+                      : "hover:bg-slate-700 text-slate-300"
+                  } last:rounded-b-lg`}
+                >
+                  🇨🇳 {t("common:chinese")}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -228,7 +284,7 @@ export default function App() {
         {activeTab === "alarms" && (
           <div className="space-y-4">
             <div className="bg-slate-900/50 backdrop-blur border border-slate-800 rounded-xl p-4">
-              <h2 className="text-slate-300 mb-4">알람 관리</h2>
+              <h2 className="text-slate-300 mb-4">{t("alarms:alarmManagement")}</h2>
               {alarms.length > 0 ? (
                 <div className="space-y-2">
                   {alarms.map((alarm) => (
@@ -238,7 +294,7 @@ export default function App() {
               ) : (
                 <div className="text-center py-12 text-slate-500">
                   <AlertCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>활성 알람이 없습니다</p>
+                  <p>{t("alarms:noAlarms")}</p>
                 </div>
               )}
             </div>

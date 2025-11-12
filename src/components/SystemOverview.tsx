@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Droplets,
   Thermometer,
@@ -18,38 +19,50 @@ interface SystemOverviewProps {
 }
 
 export function SystemOverview({ pressure, isAlarmActive, alarmCount }: SystemOverviewProps) {
+  const { t, i18n } = useTranslation();
+
+  // i18n 언어 코드를 locale 형식으로 변환
+  const getLocale = () => {
+    const langMap: Record<string, string> = {
+      ko: "ko-KR",
+      en: "en-US",
+      zh: "zh-CN",
+    };
+    return langMap[i18n.language] || "ko-KR";
+  };
+
   const stats = [
-    { 
-      label: '전체 장비', 
-      value: '12', 
-      unit: '개',
+    {
+      label: t("overview:totalEquipment"),
+      value: '12',
+      unit: t("overview:equipment"),
       icon: Server,
       color: 'text-blue-400',
       bgColor: 'bg-blue-600/10',
       iconBg: 'bg-blue-600/20'
     },
-    { 
-      label: '온라인', 
-      value: '12', 
-      unit: '개',
+    {
+      label: t("overview:online"),
+      value: '12',
+      unit: t("overview:equipment"),
       icon: CheckCircle2,
       color: 'text-green-400',
       bgColor: 'bg-green-600/10',
       iconBg: 'bg-green-600/20'
     },
-    { 
-      label: '활성 알람', 
-      value: alarmCount.toString(), 
-      unit: '개',
+    {
+      label: t("overview:activeAlarms"),
+      value: alarmCount.toString(),
+      unit: t("overview:equipment"),
       icon: AlertTriangle,
       color: alarmCount > 0 ? 'text-red-400' : 'text-slate-400',
       bgColor: alarmCount > 0 ? 'bg-red-600/10' : 'bg-slate-600/10',
       iconBg: alarmCount > 0 ? 'bg-red-600/20' : 'bg-slate-600/20'
     },
-    { 
-      label: '가동 시간', 
-      value: '127', 
-      unit: '일',
+    {
+      label: t("overview:operatingTime"),
+      value: '127',
+      unit: 'days',
       icon: Clock,
       color: 'text-purple-400',
       bgColor: 'bg-purple-600/10',
@@ -58,14 +71,14 @@ export function SystemOverview({ pressure, isAlarmActive, alarmCount }: SystemOv
   ];
 
   const equipmentStatus = [
-    { id: 1, name: '펌프 1', status: 'online', value: '13.2 bar', icon: Droplets },
-    { id: 2, name: '펌프 2', status: 'online', value: '14.1 bar', icon: Droplets },
-    { id: 3, name: '펌프 3', status: isAlarmActive ? 'alarm' : 'online', value: `${pressure.toFixed(1)} bar`, icon: Droplets },
-    { id: 4, name: '펌프 4', status: 'online', value: '13.8 bar', icon: Droplets },
-    { id: 5, name: '온도 센서 A', status: 'online', value: '23.5°C', icon: Thermometer },
-    { id: 6, name: '온도 센서 B', status: 'online', value: '24.2°C', icon: Thermometer },
-    { id: 7, name: '유량계 1', status: 'online', value: '150 L/min', icon: Wind },
-    { id: 8, name: '유량계 2', status: 'online', value: '145 L/min', icon: Wind },
+    { id: 1, name: t("overview:pump1"), status: 'online', value: '13.2 bar', icon: Droplets },
+    { id: 2, name: t("overview:pump2"), status: 'online', value: '14.1 bar', icon: Droplets },
+    { id: 3, name: t("overview:pump3"), status: isAlarmActive ? 'alarm' : 'online', value: `${pressure.toFixed(1)} bar`, icon: Droplets },
+    { id: 4, name: t("overview:pump4"), status: 'online', value: '13.8 bar', icon: Droplets },
+    { id: 5, name: t("overview:temperatureSensorA"), status: 'online', value: '23.5°C', icon: Thermometer },
+    { id: 6, name: t("overview:temperatureSensorB"), status: 'online', value: '24.2°C', icon: Thermometer },
+    { id: 7, name: t("overview:flowMeter1"), status: 'online', value: '150 L/min', icon: Wind },
+    { id: 8, name: t("overview:flowMeter2"), status: 'online', value: '145 L/min', icon: Wind },
   ];
 
   return (
@@ -89,12 +102,12 @@ export function SystemOverview({ pressure, isAlarmActive, alarmCount }: SystemOv
             </div>
             <div>
               <h2 className={isAlarmActive ? 'font-semibold text-red-300' : 'text-green-300'}>
-                {isAlarmActive ? '긴급 조치 필요' : '시스템 정상 운영'}
+                {isAlarmActive ? t('common:emergencyActionRequired') : t('common:systemOperatingNormally')}
               </h2>
               <p className="text-sm text-slate-400">
-                {new Date().toLocaleString('ko-KR', { 
+                {new Date().toLocaleString(getLocale(), {
                   year: 'numeric',
-                  month: 'long', 
+                  month: 'long',
                   day: 'numeric',
                   hour: '2-digit',
                   minute: '2-digit'
@@ -112,8 +125,8 @@ export function SystemOverview({ pressure, isAlarmActive, alarmCount }: SystemOv
       <div className="bg-slate-900/50 backdrop-blur border border-slate-800 rounded-xl overflow-hidden">
         <div className="p-4 border-b border-slate-800">
           <h2 className="text-slate-300 flex items-center gap-2 text-base font-semibold">
-            <Gauge className="w-[21px] h-[21극px]" />
-            펌프 시스템 현황
+            <Gauge className="w-[21px] h-[21px]" />
+            {t('common:pumpSystemStatus')}
           </h2>
         </div>
         <div className="relative">
@@ -127,7 +140,7 @@ export function SystemOverview({ pressure, isAlarmActive, alarmCount }: SystemOv
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
               <div className="bg-red-600/90 backdrop-blur border border-red-400 rounded-lg px-4 py-2 flex items-center gap-2 shadow-lg text-sm font-medium">
                 <AlertTriangle className="w-5 h-5 text-white animate-pulse" />
-                <span className="text-white">펌프 3 압력 이상</span>
+                <span className="text-white">{t('overview:pump3PressureAnomaly')}</span>
               </div>
             </div>
           )}
@@ -162,7 +175,7 @@ export function SystemOverview({ pressure, isAlarmActive, alarmCount }: SystemOv
       <div className="bg-slate-900/50 backdrop-blur border border-slate-800 rounded-xl p-4">
         <h2 className="text-slate-300 flex items-center gap-2 text-base font-semibold mb-4">
           <TrendingUp className="w-5 h-5" />
-          실시간 장비 상태
+          {t("overview:realTimeEquipmentStatus")}
         </h2>
         <div className="grid grid-cols-1 gap-2">
           {equipmentStatus.map((equipment) => {
