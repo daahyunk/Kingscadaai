@@ -9,6 +9,7 @@
   "activeAlarms": "活动告警",
   "operatingTime": "运行时间",
   "hours": "小时",
+  "days": "天",
   "equipment": "台",
   "realTimeEquipmentStatus": "实时设备状态",
   "status": "状态",

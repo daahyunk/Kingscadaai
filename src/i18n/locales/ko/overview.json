@@ -9,6 +9,7 @@
   "activeAlarms": "활성 알람",
   "operatingTime": "가동 시간",
   "hours": "시간",
+  "days": "일",
   "equipment": "개",
   "realTimeEquipmentStatus": "실시간 장비 상태",
   "status": "상태",

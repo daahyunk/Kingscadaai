@@ -62,7 +62,7 @@ export function SystemOverview({ pressure, isAlarmActive, alarmCount }: SystemOv
     {
       label: t("overview:operatingTime"),
       value: '127',
-      unit: 'days',
+      unit: t("overview:days"),
       icon: Clock,
       color: 'text-purple-400',
       bgColor: 'bg-purple-600/10',

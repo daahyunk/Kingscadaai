@@ -9,6 +9,7 @@
   "activeAlarms": "Active Alarms",
   "operatingTime": "Operating Time",
   "hours": "hours",
+  "days": "days",
   "equipment": "units",
   "realTimeEquipmentStatus": "Real-time Equipment Status",
   "status": "Status",
