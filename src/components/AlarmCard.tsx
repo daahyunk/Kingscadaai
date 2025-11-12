@@ -62,7 +62,8 @@ export function AlarmCard({ alarm }: AlarmCardProps) {
   // 설명 번역하기
   const getDescription = () => {
     if (alarm.descriptionKey) {
-      return t(alarm.descriptionKey.replace("alarms:", ""), alarm.descriptionParams);
+      const key = alarm.descriptionKey.replace("alarms:", "");
+      return t(key, alarm.descriptionParams);
     }
     return alarm.description;
   };

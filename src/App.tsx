@@ -17,6 +17,8 @@ export interface Message {
   type: "user" | "system" | "alert";
   content: string;
   timestamp: Date;
+  translationKey?: string;
+  translationParams?: Record<string, string | number>;
 }
 
 export interface AlarmData {
@@ -47,14 +49,19 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
       localStorage.setItem("language", initialLanguage);
     }
   }, [initialLanguage, i18n]);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      type: "system",
-      content: t("chat:assistantGreeting"),
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  // 메시지 초기화 - 언어가 로드될 때마다 실행
+  useEffect(() => {
+    setMessages([
+      {
+        id: "1",
+        type: "system",
+        content: t("chat:assistantGreeting"),
+        timestamp: new Date(),
+      },
+    ]);
+  }, [i18n.language, t]);
 
   const [alarms, setAlarms] = useState<AlarmData[]>([]);
   const [pressure, setPressure] = useState(13.0);
@@ -71,6 +78,31 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
   ]);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const [isUserScrolling, setIsUserScrolling] = useState(false);
+
+  // Detect if user is scrolled near the bottom
+  const isNearBottom = () => {
+    if (!chatContainerRef.current) return false;
+    const container = chatContainerRef.current;
+    const threshold = 100; // pixels from bottom
+    return (
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      threshold
+    );
+  };
+
+  // Handle manual scroll
+  const handleScroll = () => {
+    setIsUserScrolling(!isNearBottom());
+  };
+
+  // Auto-scroll only if user is at the bottom
+  useEffect(() => {
+    if (!isUserScrolling && chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, isUserScrolling]);
 
   // Simulate alarm trigger
   useEffect(() => {
@@ -88,8 +120,8 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
     const alarm: AlarmData = {
       id: "alarm-" + Date.now(),
       severity: "critical",
-      title: `${t("alarms:pump3_prefix")} ${t("alarms:exceedsThreshold")}`,
-      description: t("alarms:alarmDescription_pressure", { pressure: 15.5, threshold: 15.0 }),
+      title: "",
+      description: "",
       timestamp: new Date(),
       status: "active",
       titleKey: "alarmTitle_pump3",
@@ -102,7 +134,9 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
     const alertMessage: Message = {
       id: "msg-" + Date.now(),
       type: "alert",
-      content: t("alarms:alarmMessage", { pressure: 15.5 }),
+      content: "",
+      translationKey: "alarms:alarmMessage",
+      translationParams: { pressure: 15.5 },
       timestamp: new Date(),
     };
 
@@ -126,13 +160,20 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
   };
 
   const processCommand = (command: string) => {
-    let response = "";
+    let translationKey = "";
+    let translationParams: Record<string, string | number> = {};
 
-    if (command.includes("추이") || command.includes("분석")) {
-      response = t("alarms:pressureAnalysisResponse");
-    } else if (command.includes("밸브") || command.includes("줄여")) {
+    // 다국어 음성 명령어 지원
+    const trendKeywords = ["추이", "분석", "trend", "analyze", "趋势", "分析"];
+    const valveKeywords = ["밸브", "줄여", "valve", "reduce", "阀门", "减少"];
+    const reportKeywords = ["보고서", "report", "报告"];
+    const statusKeywords = ["상태", "status", "状态"];
+
+    if (trendKeywords.some(kw => command.includes(kw))) {
+      translationKey = "alarms:pressureAnalysisResponse";
+    } else if (valveKeywords.some(kw => command.includes(kw))) {
       setValvePosition(50);
-      response = t("alarms:valveOperationResponse");
+      translationKey = "alarms:valveOperationResponse";
 
       // Simulate pressure decrease
       setTimeout(() => {
@@ -159,23 +200,28 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
         const normalMessage: Message = {
           id: "msg-" + Date.now(),
           type: "system",
-          content: t("alarms:pressureRecoveryMessage", { pressure: 13.5 }),
+          translationKey: "alarms:pressureRecoveryMessage",
+          translationParams: { pressure: 13.5 },
+          content: "",
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, normalMessage]);
       }, 3000);
-    } else if (command.includes("보고서")) {
-      response = t("alarms:reportGenerationResponse");
-    } else if (command.includes("상태")) {
-      response = t("alarms:statusQueryResponse", { pressure: pressure.toFixed(1), position: valvePosition });
+    } else if (reportKeywords.some(kw => command.includes(kw))) {
+      translationKey = "alarms:reportGenerationResponse";
+    } else if (statusKeywords.some(kw => command.includes(kw))) {
+      translationKey = "alarms:statusQueryResponse";
+      translationParams = { pressure: pressure.toFixed(1), position: valvePosition };
     } else {
-      response = t("alarms:commandDefaultResponse");
+      translationKey = "alarms:commandDefaultResponse";
     }
 
     const systemMessage: Message = {
       id: "msg-" + Date.now(),
       type: "system",
-      content: response,
+      content: "",
+      translationKey,
+      translationParams,
       timestamp: new Date(),
     };
 
@@ -187,15 +233,14 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
   }, [messages]);
 
   const handleLanguageChange = (lang: string) => {
-    i18n.changeLanguage(lang);
     localStorage.setItem("language", lang);
     setShowLanguageMenu(false);
-    // URL도 함께 변경
-    window.history.pushState({}, "", `/${lang}`);
+    // URL 변경 후 페이지 새로고침
+    window.location.href = `/${lang}`;
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 pb-32">
+    <div className="min-h-screen bg-slate-950 text-slate-100">
       {/* Header */}
       <header className="bg-slate-950 px-4 py-4 border-b border-slate-800">
         <div className="flex items-center justify-between max-w-6xl mx-auto">
@@ -276,7 +321,7 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
       />
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-6 py-6 space-y-4">
+      <main className="max-w-6xl mx-auto px-6 py-6 space-y-4 pb-24">
         {activeTab === "overview" && (
           <SystemOverview
             pressure={pressure}
@@ -316,8 +361,12 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
         )}
 
         {activeTab === "chat" && (
-          <div className="flex flex-col h-[calc(100vh-140px)] pb-24">
-            <div className="flex-1 overflow-y-auto">
+          <div className="flex flex-col flex-1">
+            <div
+              ref={chatContainerRef}
+              className="flex-1 overflow-y-auto"
+              onScroll={handleScroll}
+            >
               <ChatInterface messages={messages} />
               <div ref={chatEndRef} />
             </div>

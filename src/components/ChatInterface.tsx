@@ -66,7 +66,11 @@ export function ChatInterface({ messages }: ChatInterfaceProps) {
                     : "bg-slate-800 text-slate-200"
                 }`}
               >
-                <p className="whitespace-pre-wrap text-sm">{message.content}</p>
+                <p className="whitespace-pre-wrap text-sm">
+                  {message.translationKey
+                    ? t(message.translationKey, message.translationParams)
+                    : message.content}
+                </p>
               </div>
               <p className="text-xs text-slate-500 mt-1 px-1">
                 {message.timestamp.toLocaleTimeString(getLocale(), {
