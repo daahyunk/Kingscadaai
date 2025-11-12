@@ -31,10 +31,22 @@ export interface AlarmData {
   descriptionParams?: Record<string, string | number>;
 }
 
-export default function App() {
+interface AppProps {
+  initialLanguage?: string;
+}
+
+export default function App({ initialLanguage = "ko" }: AppProps) {
   const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+
+  // URL 기반 언어 설정
+  useEffect(() => {
+    if (initialLanguage && i18n.language !== initialLanguage) {
+      i18n.changeLanguage(initialLanguage);
+      localStorage.setItem("language", initialLanguage);
+    }
+  }, [initialLanguage, i18n]);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -178,6 +190,8 @@ export default function App() {
     i18n.changeLanguage(lang);
     localStorage.setItem("language", lang);
     setShowLanguageMenu(false);
+    // URL도 함께 변경
+    window.history.pushState({}, "", `/${lang}`);
   };
 
   return (
