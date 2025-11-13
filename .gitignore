@@ -32,4 +32,5 @@ build
 *.tsbuildinfo
 
 # vercel
+.vercel
 .vercel.env
