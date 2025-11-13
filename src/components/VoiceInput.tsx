@@ -1,38 +1,71 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Mic, Send, Sparkles } from "lucide-react";
 import { Button } from "./ui/button";
 import { useTranslation } from "react-i18next";
+import { useRealtimeAI } from "../hooks/use-realtime-ai"; // ✅ 추가
 
 interface VoiceInputProps {
   onVoiceCommand: (command: string) => void;
 }
 
 export function VoiceInput({ onVoiceCommand }: VoiceInputProps) {
-  const { t } = useTranslation('chat');
-  const [isListening, setIsListening] = useState(false);
+  const { t } = useTranslation("chat");
   const [inputValue, setInputValue] = useState("");
   const [showQuickCommands, setShowQuickCommands] = useState(false);
+  const [volumeBars, setVolumeBars] = useState<number[]>([0.3, 0.5, 0.7, 0.5, 0.3]);
+  const [showEndHint, setShowEndHint] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // ✅ Realtime AI 훅 연결
+  const { startCall, endCall, isConnecting, isConnected } = useRealtimeAI();
+
+  // 🎙️ 음성 연결 중 애니메이션 효과
+  useEffect(() => {
+    if (!isConnected) return;
+
+    const interval = setInterval(() => {
+      setVolumeBars((prev) =>
+        prev.map(() => Math.random() * 0.7 + 0.3)
+      );
+    }, 150);
+
+    return () => clearInterval(interval);
+  }, [isConnected]);
+
+  // 🎙️ 음성 연결되었을 때 종료 방법 안내
+  useEffect(() => {
+    if (isConnected) {
+      setShowEndHint(true);
+      const timer = setTimeout(() => setShowEndHint(false), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [isConnected]);
+
   const quickCommands = [
-    t('quickCommand1'),
-    t('quickCommand2'),
-    t('quickCommand3'),
-    t('quickCommand4'),
+    t("quickCommand1"),
+    t("quickCommand2"),
+    t("quickCommand3"),
+    t("quickCommand4"),
   ];
 
-  const handleMicClick = () => {
-    setIsListening(!isListening);
+  /** 🎙️ 마이크 버튼 클릭 시 - 음성 연결/해제 */
+  const handleMicClick = async () => {
+    if (isConnected) {
+      endCall();
+      return;
+    }
 
-    if (!isListening) {
-      // Simulate voice recognition
-      setTimeout(() => {
-        setIsListening(false);
-        // This would be replaced with actual voice recognition
-      }, 2000);
+    if (isConnecting) return;
+
+    try {
+      console.log("[VoiceInput] Starting AI voice call...");
+      await startCall("ko"); // ✅ 한국어 기본
+    } catch (err) {
+      console.error("[VoiceInput] startCall failed:", err);
     }
   };
 
+  /** 텍스트 명령 전송 */
   const handleSend = () => {
     if (inputValue.trim()) {
       onVoiceCommand(inputValue);
@@ -41,11 +74,13 @@ export function VoiceInput({ onVoiceCommand }: VoiceInputProps) {
     }
   };
 
+  /** 빠른 명령 전송 */
   const handleQuickCommand = (command: string) => {
     onVoiceCommand(command);
     setShowQuickCommands(false);
   };
 
+  /** 엔터키 전송 */
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -55,7 +90,7 @@ export function VoiceInput({ onVoiceCommand }: VoiceInputProps) {
 
   return (
     <>
-      {/* Quick Commands Overlay */}
+      {/* ✅ 빠른 명령 오버레이 */}
       {showQuickCommands && (
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
@@ -68,7 +103,7 @@ export function VoiceInput({ onVoiceCommand }: VoiceInputProps) {
             <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 shadow-2xl">
               <div className="flex items-center gap-2 text-slate-300 mb-3">
                 <Sparkles className="w-4 h-4" />
-                <span className="text-sm">{t('common:voiceCommands')}</span>
+                <span className="text-sm">{t("common:voiceCommands")}</span>
               </div>
               <div className="space-y-2">
                 {quickCommands.map((command, index) => (
@@ -86,10 +121,64 @@ export function VoiceInput({ onVoiceCommand }: VoiceInputProps) {
         </div>
       )}
 
-      {/* Voice Input Bar */}
+      {/* ✅ 하단 음성 입력바 */}
       <div className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur border-t border-slate-800 px-4 py-4 z-30">
         <div className="max-w-6xl mx-auto">
+          {/* 🎤 음성 연결 상태 표시 - 애니메이션 UI (INPUT 위에 표시) */}
+          {isConnecting && (
+            <div className="mb-4 flex flex-col items-center gap-3">
+              {/* 음성 연결 중 파동 애니메이션 */}
+              <div className="flex items-end justify-center gap-1 h-12">
+                {[...Array(7)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-1 bg-gradient-to-t from-blue-500 to-blue-300 rounded-full transition-all duration-150"
+                    style={{
+                      height: `${12 + Math.sin(Date.now() / 100 + i) * 16}px`,
+                      animation: `wave 0.6s ease-in-out infinite`,
+                      animationDelay: `${i * 0.1}s`,
+                    }}
+                  />
+                ))}
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-medium text-blue-400">
+                  {t("common:voiceConnecting")}
+                </p>
+                <p className="text-xs text-slate-400 mt-1">마이크 준비 중...</p>
+              </div>
+            </div>
+          )}
+
+          {isConnected && (
+            <div className="mb-4 flex flex-col items-center gap-3">
+              {/* 음성 연결됨 - 사운드바 애니메이션 */}
+              <div className="flex items-end justify-center gap-1.5 h-12">
+                {volumeBars.map((height, i) => (
+                  <div
+                    key={i}
+                    className="w-1.5 bg-gradient-to-t from-emerald-500 to-emerald-300 rounded-sm transition-all duration-150"
+                    style={{
+                      height: `${height * 40}px`,
+                    }}
+                  />
+                ))}
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-medium text-emerald-400 flex items-center justify-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  {t("common:voiceConnected")}
+                </p>
+                <p className="text-xs text-slate-400 mt-1">AI 음성 안내 중...</p>
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center gap-2">
+            {/* 빠른 명령 버튼 */}
             <Button
               onClick={() => setShowQuickCommands(!showQuickCommands)}
               variant="outline"
@@ -99,6 +188,7 @@ export function VoiceInput({ onVoiceCommand }: VoiceInputProps) {
               <Sparkles className="w-5 h-5" />
             </Button>
 
+            {/* 텍스트 입력 */}
             <div className="flex-1 relative">
               <input
                 ref={inputRef}
@@ -106,26 +196,47 @@ export function VoiceInput({ onVoiceCommand }: VoiceInputProps) {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder={t('common:inputPlaceholder')}
+                placeholder={t("common:inputPlaceholder")}
                 className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none"
-                style={{ fontSize: '16px' }}
+                style={{ fontSize: "16px" }}
               />
             </div>
 
-            <Button
-              onClick={handleMicClick}
-              size="icon"
-              className={`flex-shrink-0 ${
-                isListening
-                  ? "bg-red-500 hover:bg-red-600"
-                  : "bg-slate-700 hover:bg-slate-600"
-              }`}
-            >
-              <Mic
-                className={`w-5 h-5 ${isListening ? "animate-pulse" : ""}`}
-              />
-            </Button>
+            {/* 🎙️ 마이크 버튼 */}
+            <div className="relative">
+              <Button
+                onClick={handleMicClick}
+                size="icon"
+                className={`flex-shrink-0 transition-all duration-300 ${
+                  isConnecting
+                    ? "bg-yellow-500 hover:bg-yellow-600"
+                    : isConnected
+                    ? "bg-red-500 hover:bg-red-600 animate-pulse"
+                    : "bg-slate-700 hover:bg-slate-600"
+                }`}
+                title={isConnected ? "음성 안내 종료 (클릭)" : "음성 안내 시작"}
+              >
+                <Mic
+                  className={`w-5 h-5 ${
+                    isConnecting
+                      ? "animate-pulse"
+                      : isConnected
+                      ? "text-white"
+                      : ""
+                  }`}
+                />
+              </Button>
 
+              {/* 음성 연결됨 안내 - 모바일/데스크톱 모두 작동 */}
+              {isConnected && showEndHint && (
+                <div className="absolute -top-16 left-1/2 -translate-x-1/2 px-4 py-3 bg-red-500 text-white text-sm rounded-lg whitespace-nowrap shadow-lg z-50 font-medium">
+                  빨간 버튼을 눌러 종료하세요
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 border-4 border-transparent border-t-red-500"></div>
+                </div>
+              )}
+            </div>
+
+            {/* 전송 버튼 */}
             <Button
               onClick={handleSend}
               size="icon"
@@ -135,15 +246,6 @@ export function VoiceInput({ onVoiceCommand }: VoiceInputProps) {
               <Send className="w-5 h-5" />
             </Button>
           </div>
-
-          {isListening && (
-            <div className="mt-3 text-center">
-              <div className="inline-flex items-center gap-2 bg-red-600/20 border border-red-600/30 text-red-400 px-4 py-2 rounded-lg">
-                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                <span className="text-sm">{t('common:voiceRecognizing')}</span>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </>

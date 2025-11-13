@@ -1,0 +1,39 @@
+{
+  "equipments": [
+    {
+      "id": 1,
+      "name": "펌프 1번",
+      "type": "pump",
+      "pressure": 13.8,
+      "temperature": 42.3,
+      "threshold": { "pressure": 15.0, "temperature": 60.0 },
+      "status": "normal"
+    },
+    {
+      "id": 2,
+      "name": "펌프 2번",
+      "type": "pump",
+      "pressure": 15.4,
+      "temperature": 58.1,
+      "threshold": { "pressure": 15.0, "temperature": 60.0 },
+      "status": "warning"
+    },
+    {
+      "id": 3,
+      "name": "펌프 3번",
+      "type": "pump",
+      "pressure": 16.8,
+      "temperature": 67.5,
+      "threshold": { "pressure": 15.0, "temperature": 60.0 },
+      "status": "danger"
+    },
+    {
+      "id": 4,
+      "name": "밸브 102",
+      "type": "valve",
+      "openRatio": 40,
+      "targetRatio": 50,
+      "status": "warning"
+    }
+  ]
+}

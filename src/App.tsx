@@ -126,7 +126,7 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
       status: "active",
       titleKey: "alarmTitle_pump3",
       descriptionKey: "alarms:alarmDescription_pressure",
-      descriptionParams: { pressure: 15.5, threshold: 15.0 }
+      descriptionParams: { pressure: 15.5, threshold: 15.0 },
     };
 
     setAlarms([alarm]);
@@ -169,9 +169,9 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
     const reportKeywords = ["보고서", "report", "报告"];
     const statusKeywords = ["상태", "status", "状态"];
 
-    if (trendKeywords.some(kw => command.includes(kw))) {
+    if (trendKeywords.some((kw) => command.includes(kw))) {
       translationKey = "alarms:pressureAnalysisResponse";
-    } else if (valveKeywords.some(kw => command.includes(kw))) {
+    } else if (valveKeywords.some((kw) => command.includes(kw))) {
       setValvePosition(50);
       translationKey = "alarms:valveOperationResponse";
 
@@ -207,11 +207,14 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
         };
         setMessages((prev) => [...prev, normalMessage]);
       }, 3000);
-    } else if (reportKeywords.some(kw => command.includes(kw))) {
+    } else if (reportKeywords.some((kw) => command.includes(kw))) {
       translationKey = "alarms:reportGenerationResponse";
-    } else if (statusKeywords.some(kw => command.includes(kw))) {
+    } else if (statusKeywords.some((kw) => command.includes(kw))) {
       translationKey = "alarms:statusQueryResponse";
-      translationParams = { pressure: pressure.toFixed(1), position: valvePosition };
+      translationParams = {
+        pressure: pressure.toFixed(1),
+        position: valvePosition,
+      };
     } else {
       translationKey = "alarms:commandDefaultResponse";
     }
@@ -343,7 +346,9 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
         {activeTab === "alarms" && (
           <div className="space-y-4">
             <div className="bg-slate-900/50 backdrop-blur border border-slate-800 rounded-xl p-4">
-              <h2 className="text-slate-300 mb-4">{t("alarms:alarmManagement")}</h2>
+              <h2 className="text-slate-300 mb-4">
+                {t("alarms:alarmManagement")}
+              </h2>
               {alarms.length > 0 ? (
                 <div className="space-y-2">
                   {alarms.map((alarm) => (
