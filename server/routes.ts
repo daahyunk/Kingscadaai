@@ -26,7 +26,7 @@ function greetingByLang(lang: Lang) {
     case "zh":
       return `你好！我是始兴滩涂庆典的AI咨询顾问。`;
     default:
-      return `안녕하세요! 저는 시흥갯골축제의 AI 상담사예요.`;
+      return `안녕하세요! 저는 킹스카다 AI 상담사예요.`;
   }
 }
 
