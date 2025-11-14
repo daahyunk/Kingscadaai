@@ -8,11 +8,11 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // 🔸 언어 타입 정의
-type Lang = "ko" | "en" | "ja" | "zh";
+type Lang = "ko" | "en" | "zh";
 
 function resolveLang(input?: string): Lang {
   const l = (input || "").toLowerCase();
-  if (l === "en" || l === "ja" || l === "zh") return l;
+  if (l === "en" || l === "zh") return l;
   return "ko";
 }
 
@@ -20,13 +20,11 @@ function resolveLang(input?: string): Lang {
 function greetingByLang(lang: Lang) {
   switch (lang) {
     case "en":
-      return `Hello! I'm the AI assistant for the Siheung Gaetgol Festival.`;
-    case "ja":
-      return `こんにちは！シフン・ゲッコル祭りのAI相談員です。`;
+      return `Hello! I'm the KingSCADA AI assistant. If you need to check anything about your equipment, just let me know. I'll quickly review the situation and guide you with the right actions.`;
     case "zh":
-      return `你好！我是始兴滩涂庆典的AI咨询顾问。`;
+      return `你好！我是 KingSCADA AI。如果你想了解设备相关情况或需要确认什么，随时告诉我。我会迅速了解状况，并给出相应的处理建议。`;
     default:
-      return `안녕하세요! 저는 킹스카다 AI 상담사예요.`;
+      return `안녕하세요! 킹스카다 AI입니다. 설비에 관련해 궁금한 점이나 확인이 필요하시면 말씀해 주세요. 바로 상황을 파악해 필요한 조치를 안내해드릴게요.`;
   }
 }
 
@@ -34,8 +32,6 @@ function langMeta(lang: Lang) {
   switch (lang) {
     case "en":
       return { name: "English", code: "en" };
-    case "ja":
-      return { name: "Japanese", code: "ja" };
     case "zh":
       return { name: "Chinese", code: "zh" };
     default:
@@ -122,14 +118,15 @@ async function handleSession(req: Request, res: Response) {
         model: "gpt-4o-realtime-preview-2024-10-01",
         voice: "alloy",
         instructions: `
-You are the official AI voice assistant for '${festival.name}'.
+            You are the official AI voice assistant for '${festival.name}'.
 
-1) On the first response, greet in ${langName}: "${greet}".
-2) After that, respond in the same language as the user's input.
-3) When a question maps to a UI section, call:
-   navigateSection({ section: "<info|announcements|gallery|food|location|program|goods>" })
-Then speak your answer.
-Keep your answers concise and friendly.
+            1) On the very first response after the call starts, say exactly one short greeting in ${langName}:
+"${greet}"
+            2) After that, respond in the same language as the user's input.
+            3) When a question maps to a UI section, call:
+              navigateSection({ section: "<info|announcements|gallery|food|location|program|goods>" })
+            Then speak your answer.
+            Keep your answers concise and friendly.
         `.trim(),
       }),
     });

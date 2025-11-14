@@ -9,7 +9,7 @@ interface VoiceInputProps {
 }
 
 export function VoiceInput({ onVoiceCommand }: VoiceInputProps) {
-  const { t } = useTranslation("chat");
+  const { t, i18n } = useTranslation("chat");
   const [inputValue, setInputValue] = useState("");
   const [showQuickCommands, setShowQuickCommands] = useState(false);
   const [volumeBars, setVolumeBars] = useState<number[]>([0.3, 0.5, 0.7, 0.5, 0.3]);
@@ -58,8 +58,10 @@ export function VoiceInput({ onVoiceCommand }: VoiceInputProps) {
     if (isConnecting) return;
 
     try {
-      console.log("[VoiceInput] Starting AI voice call...");
-      await startCall("ko"); // ✅ 한국어 기본
+      // 현재 i18n 언어 사용 (ko, en, zh 중 하나)
+      const currentLang = i18n.language || "ko";
+      console.log(`[VoiceInput] Starting AI voice call with language: ${currentLang}`);
+      await startCall(currentLang);
     } catch (err) {
       console.error("[VoiceInput] startCall failed:", err);
     }
