@@ -60,8 +60,7 @@ export function useRealtimeAI() {
       // 서버 세션 호출
       const tokenRes = await fetch(`/api/session/${lang}`);
       const data = await tokenRes.json();
-      const EPHEMERAL_KEY: string | undefined =
-        data?.client_secret?.value;
+      const EPHEMERAL_KEY: string | undefined = data?.value;
 
       if (!EPHEMERAL_KEY)
         throw new Error("No ephemeral key received from server");
@@ -128,6 +127,7 @@ export function useRealtimeAI() {
           JSON.stringify({
             type: "session.update",
             session: {
+              type: "realtime",
               tools: [
                 {
                   type: "function",
@@ -225,10 +225,8 @@ export function useRealtimeAI() {
       await pc.setLocalDescription(offer);
       await waitForIceGatheringComplete(pc);
 
-      const model = "gpt-4o-realtime-preview-2025-06-03";
-
       const sdpResponse = await fetch(
-        `https://api.openai.com/v1/realtime?model=${model}`,
+        "https://api.openai.com/v1/realtime/calls",
         {
           method: "POST",
           headers: {

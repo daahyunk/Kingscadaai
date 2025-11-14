@@ -112,15 +112,17 @@ async function handleSession(req: Request, res: Response) {
   try {
     console.log("⚙️ [Server] OpenAI 세션 생성 시도중...");
 
-    const resp = await fetch("https://api.openai.com/v1/realtime/sessions", {
+    const resp = await fetch("https://api.openai.com/v1/realtime/client_secrets", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-realtime-preview-2025-06-03",
-        instructions: `
+        session: {
+          type: "realtime",
+          model: "gpt-realtime",
+          instructions: `
 You are the official AI voice assistant for '${festival.name}'.
 
 1) On the first response, greet in ${langName}: "${greet}".
@@ -129,7 +131,8 @@ You are the official AI voice assistant for '${festival.name}'.
    navigateSection({ section: "<info|announcements|gallery|food|location|program|goods>" })
 Then speak your answer.
 Keep your answers concise and friendly.
-        `.trim(),
+          `.trim(),
+        },
       }),
     });
 
