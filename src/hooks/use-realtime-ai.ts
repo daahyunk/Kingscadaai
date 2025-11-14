@@ -60,11 +60,19 @@ export function useRealtimeAI() {
       // 서버 세션 호출
       const tokenRes = await fetch(`/api/session/${lang}`);
       const data = await tokenRes.json();
+
+      if (!tokenRes.ok || data.error) {
+        const errorMessage = data.error || `Server error: ${tokenRes.status}`;
+        console.error("[Realtime] Session creation failed:", errorMessage);
+        throw new Error(`음성 세션을 시작할 수 없습니다: ${errorMessage}`);
+      }
+
       const EPHEMERAL_KEY: string | undefined =
         data?.client_secret?.value;
 
-      if (!EPHEMERAL_KEY)
-        throw new Error("No ephemeral key received from server");
+      if (!EPHEMERAL_KEY) {
+        throw new Error("서버에서 인증 키를 받지 못했습니다. API 키를 확인해주세요.");
+      }
 
       // WebRTC
       const pc = new RTCPeerConnection({
