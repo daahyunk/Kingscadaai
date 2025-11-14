@@ -9,7 +9,7 @@ This is an AI-powered voice chatbot application for the Siheung Gaetgol Festival
 - Added CORS configuration to allow Vercel frontend (https://wellintech.nuguna.ai/) to access Replit backend
 - Disabled static file serving in production (backend serves API only)
 - Reverted frontend error handling to original implementation
-- Deployment configuration: Autoscale with `npm run build` and `npm start`
+- Deployment configuration: Autoscale with `npm start` only (no build step, backend only)
 
 **2025-11-14: Initial Replit Setup**
 - Configured Vite dev server to run on port 5000 with host 0.0.0.0 for Replit compatibility
@@ -49,11 +49,12 @@ This starts:
 1. Vite dev server on port 5000 (frontend)
 2. Express server on port 8080 (backend via tsx)
 
-### Production Build
+### Production (Replit Backend Only)
 ```bash
-npm run build  # Builds frontend
-npm start      # Runs backend in production mode
+npm start      # Runs backend in production mode (no build needed)
 ```
+
+Note: Frontend build is handled by Vercel separately.
 
 ## Deployment Notes
 - **Development**: Frontend accessible on port 5000 (Replit webview), backend on port 8080
