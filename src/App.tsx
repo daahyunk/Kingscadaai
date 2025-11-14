@@ -77,6 +77,26 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
     { time: "10:45", pressure: 15.5 },
   ]);
 
+  // 모든 장비의 현재값
+  const [equipmentStatus, setEquipmentStatus] = useState({
+    // Pumps (bar)
+    pump1: 13.2,
+    pump2: 13.2,
+    pump3: 13.2,
+    pump4: 13.2,
+    // Temperature Sensors (°C)
+    temperatureSensorA: 24.2,
+    temperatureSensorB: 24.2,
+    // Flow Meters (L/min)
+    flowMeter1: 150,
+    flowMeter2: 150,
+    // Pressure Sensors (bar)
+    pressureSensorA: 13.2,
+    pressureSensorB: 13.2,
+    pressureSensorC: 13.2,
+    pressureSensorD: 13.2,
+  });
+
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [isUserScrolling, setIsUserScrolling] = useState(false);
@@ -157,6 +177,17 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
     setTimeout(() => {
       processCommand(command);
     }, 500);
+  };
+
+  const handleAIMessage = (message: string) => {
+    const aiMessage: Message = {
+      id: "msg-" + Date.now(),
+      type: "system",
+      content: message,
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, aiMessage]);
   };
 
   const processCommand = (command: string) => {
@@ -381,7 +412,14 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
 
       {/* Voice Input (Fixed Bottom - Only in Chat Tab) */}
       {activeTab === "chat" && (
-        <VoiceInput onVoiceCommand={handleVoiceCommand} />
+        <VoiceInput
+          onVoiceCommand={handleVoiceCommand}
+          onAIMessage={handleAIMessage}
+          currentEquipmentState={{
+            ...equipmentStatus,
+            valvePosition,
+          }}
+        />
       )}
     </div>
   );

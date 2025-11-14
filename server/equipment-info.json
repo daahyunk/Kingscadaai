@@ -1,39 +1,225 @@
 {
-  "equipments": [
+
+  "equipment": [
     {
-      "id": 1,
-      "name": "펌프 1번",
+      "id": "pump1",
+      "names": { "ko": "펌프 1", "en": "Pump 1", "zh": "泵 1" },
       "type": "pump",
-      "pressure": 13.8,
-      "temperature": 42.3,
-      "threshold": { "pressure": 15.0, "temperature": 60.0 },
-      "status": "normal"
+      "normalRange": { "min": 10, "max": 15 },
+      "unit": "bar",
+      "measures": [
+        {
+          "condition": { "ko": "압력 > 15 bar", "en": "Pressure > 15 bar", "zh": "压力 > 15 bar" },
+          "action": { "ko": "밸브 V-102를 50%로 조정하여 압력 감소", "en": "Adjust valve V-102 to 50% to reduce pressure", "zh": "将阀门 V-102 调整到 50% 以降低压力" }
+        },
+        {
+          "condition": { "ko": "압력 < 10 bar", "en": "Pressure < 10 bar", "zh": "压力 < 10 bar" },
+          "action": { "ko": "펌프 흡입부를 확인하고 필터 청소 또는 교체", "en": "Check pump inlet and clean or replace filter", "zh": "检查泵入口并清洁或更换过滤器" }
+        }
+      ]
     },
     {
-      "id": 2,
-      "name": "펌프 2번",
+      "id": "pump2",
+      "names": { "ko": "펌프 2", "en": "Pump 2", "zh": "泵 2" },
       "type": "pump",
-      "pressure": 15.4,
-      "temperature": 58.1,
-      "threshold": { "pressure": 15.0, "temperature": 60.0 },
-      "status": "warning"
+      "normalRange": { "min": 10, "max": 15 },
+      "unit": "bar",
+      "measures": [
+        {
+          "condition": { "ko": "압력 > 15 bar", "en": "Pressure > 15 bar", "zh": "压力 > 15 bar" },
+          "action": { "ko": "밸브 V-103을 50%로 조정하여 압력 감소", "en": "Adjust valve V-103 to 50% to reduce pressure", "zh": "将阀门 V-103 调整到 50% 以降低压力" }
+        },
+        {
+          "condition": { "ko": "압력 < 10 bar", "en": "Pressure < 10 bar", "zh": "压力 < 10 bar" },
+          "action": { "ko": "펌프 상태 점검 및 베어링 윤활유 확인", "en": "Check pump condition and verify bearing lubrication", "zh": "检查泵的状况并验证轴承润滑" }
+        }
+      ]
     },
     {
-      "id": 3,
-      "name": "펌프 3번",
+      "id": "pump3",
+      "names": { "ko": "펌프 3", "en": "Pump 3", "zh": "泵 3" },
       "type": "pump",
-      "pressure": 16.8,
-      "temperature": 67.5,
-      "threshold": { "pressure": 15.0, "temperature": 60.0 },
-      "status": "danger"
+      "normalRange": { "min": 10, "max": 15 },
+      "unit": "bar",
+      "measures": [
+        {
+          "condition": { "ko": "압력 > 15 bar", "en": "Pressure > 15 bar", "zh": "压力 > 15 bar" },
+          "action": { "ko": "밸브 V-104를 50%로 조정하여 압력 감소", "en": "Adjust valve V-104 to 50% to reduce pressure", "zh": "将阀门 V-104 调整到 50% 以降低压力" }
+        },
+        {
+          "condition": { "ko": "압력 < 10 bar", "en": "Pressure < 10 bar", "zh": "压力 < 10 bar" },
+          "action": { "ko": "펌프 모터 진동 점검 및 임펠러 손상 확인", "en": "Check pump motor vibration and inspect impeller for damage", "zh": "检查泵电动机振动并检查叶轮是否损坏" }
+        }
+      ]
     },
     {
-      "id": 4,
-      "name": "밸브 102",
-      "type": "valve",
-      "openRatio": 40,
-      "targetRatio": 50,
-      "status": "warning"
+      "id": "pump4",
+      "names": { "ko": "펌프 4", "en": "Pump 4", "zh": "泵 4" },
+      "type": "pump",
+      "normalRange": { "min": 10, "max": 15 },
+      "unit": "bar",
+      "measures": [
+        {
+          "condition": { "ko": "압력 > 15 bar", "en": "Pressure > 15 bar", "zh": "压力 > 15 bar" },
+          "action": { "ko": "밸브 V-105를 50%로 조정하여 압력 감소", "en": "Adjust valve V-105 to 50% to reduce pressure", "zh": "将阀门 V-105 调整到 50% 以降低压力" }
+        },
+        {
+          "condition": { "ko": "압력 < 10 bar", "en": "Pressure < 10 bar", "zh": "压力 < 10 bar" },
+          "action": { "ko": "펌프 케이싱 누수 점검 및 씰 교체 검토", "en": "Check pump casing for leaks and consider seal replacement", "zh": "检查泵壳体是否泄漏并考虑更换密封件" }
+        }
+      ]
+    },
+    {
+      "id": "temperature_sensor_a",
+      "names": { "ko": "온도 센서 A", "en": "Temperature Sensor A", "zh": "温度传感器 A" },
+      "type": "temperature",
+      "normalRange": { "min": 15, "max": 35 },
+      "unit": "C",
+      "measures": [
+        {
+          "condition": { "ko": "온도 > 50C", "en": "Temperature > 50C", "zh": "温度 > 50C" },
+          "action": { "ko": "냉각팬 속도 증가 및 냉각수 순환 확인", "en": "Increase cooling fan speed and verify coolant circulation", "zh": "增加冷却风扇速度并验证冷却液循环" }
+        },
+        {
+          "condition": { "ko": "온도 > 80C", "en": "Temperature > 80C", "zh": "温度 > 80C" },
+          "action": { "ko": "긴급 냉각 시스템 가동 및 작업 일시 중단", "en": "Activate emergency cooling system and pause operations", "zh": "启动应急冷却系统并暂停操作" }
+        },
+        {
+          "condition": { "ko": "온도 < 5C", "en": "Temperature < 5C", "zh": "温度 < 5C" },
+          "action": { "ko": "가열 시스템 점검 및 온도 센서 교정", "en": "Check heating system and calibrate temperature sensor", "zh": "检查加热系统并校准温度传感器" }
+        }
+      ]
+    },
+    {
+      "id": "temperature_sensor_b",
+      "names": { "ko": "온도 센서 B", "en": "Temperature Sensor B", "zh": "温度传感器 B" },
+      "type": "temperature",
+      "normalRange": { "min": 15, "max": 35 },
+      "unit": "C",
+      "measures": [
+        {
+          "condition": { "ko": "온도 > 50C", "en": "Temperature > 50C", "zh": "温度 > 50C" },
+          "action": { "ko": "냉각팬 속도 증가 및 냉각수 순환 확인", "en": "Increase cooling fan speed and verify coolant circulation", "zh": "增加冷却风扇速度并验证冷却液循环" }
+        },
+        {
+          "condition": { "ko": "온도 > 80C", "en": "Temperature > 80C", "zh": "温度 > 80C" },
+          "action": { "ko": "긴급 냉각 시스템 가동 및 작업 일시 중단", "en": "Activate emergency cooling system and pause operations", "zh": "启动应急冷却系统并暂停操作" }
+        },
+        {
+          "condition": { "ko": "온도 < 5C", "en": "Temperature < 5C", "zh": "温度 < 5C" },
+          "action": { "ko": "가열 시스템 점검 및 온도 센서 교정", "en": "Check heating system and calibrate temperature sensor", "zh": "检查加热系统并校准温度传感器" }
+        }
+      ]
+    },
+    {
+      "id": "flow_meter_1",
+      "names": { "ko": "유량계 1", "en": "Flow Meter 1", "zh": "流量计 1" },
+      "type": "flow",
+      "normalRange": { "min": 140, "max": 160 },
+      "unit": "L/min",
+      "measures": [
+        {
+          "condition": { "ko": "유량 < 100 L/min", "en": "Flow < 100 L/min", "zh": "流量 < 100 L/min" },
+          "action": { "ko": "필터 청소 또는 교체 및 펌프 흡입부 확인", "en": "Clean or replace filter and check pump inlet", "zh": "清洁或更换过滤器并检查泵入口" }
+        },
+        {
+          "condition": { "ko": "유량 > 180 L/min", "en": "Flow > 180 L/min", "zh": "流量 > 180 L/min" },
+          "action": { "ko": "배출 밸브 개방도 조정 및 시스템 압력 확인", "en": "Adjust discharge valve opening and verify system pressure", "zh": "调整排放阀开度并验证系统压力" }
+        },
+        {
+          "condition": { "ko": "유량 = 0 L/min", "en": "Flow = 0 L/min", "zh": "流量 = 0 L/min" },
+          "action": { "ko": "유량계 센서 고장 여부 확인 및 교정", "en": "Check for flow meter sensor failure and recalibrate", "zh": "检查流量计传感器是否出现故障并重新校准" }
+        }
+      ]
+    },
+    {
+      "id": "flow_meter_2",
+      "names": { "ko": "유량계 2", "en": "Flow Meter 2", "zh": "流量计 2" },
+      "type": "flow",
+      "normalRange": { "min": 140, "max": 160 },
+      "unit": "L/min",
+      "measures": [
+        {
+          "condition": { "ko": "유량 < 100 L/min", "en": "Flow < 100 L/min", "zh": "流量 < 100 L/min" },
+          "action": { "ko": "필터 청소 또는 교체 및 펌프 흡입부 확인", "en": "Clean or replace filter and check pump inlet", "zh": "清洁或更换过滤器并检查泵入口" }
+        },
+        {
+          "condition": { "ko": "유량 > 180 L/min", "en": "Flow > 180 L/min", "zh": "流量 > 180 L/min" },
+          "action": { "ko": "배출 밸브 개방도 조정 및 시스템 압력 확인", "en": "Adjust discharge valve opening and verify system pressure", "zh": "调整排放阀开度并验证系统压力" }
+        },
+        {
+          "condition": { "ko": "유량 = 0 L/min", "en": "Flow = 0 L/min", "zh": "流量 = 0 L/min" },
+          "action": { "ko": "유량계 센서 고장 여부 확인 및 교정", "en": "Check for flow meter sensor failure and recalibrate", "zh": "检查流量计传感器是否出现故障并重新校准" }
+        }
+      ]
+    },
+    {
+      "id": "pressure_sensor_a",
+      "names": { "ko": "압력 센서 A", "en": "Pressure Sensor A", "zh": "压力传感器 A" },
+      "type": "pressure",
+      "normalRange": { "min": 10, "max": 15 },
+      "unit": "bar",
+      "measures": [
+        {
+          "condition": { "ko": "압력 > 15 bar", "en": "Pressure > 15 bar", "zh": "压力 > 15 bar" },
+          "action": { "ko": "밸브 V-102를 50%로 조정하여 압력 감소", "en": "Adjust valve V-102 to 50% to reduce pressure", "zh": "将阀门 V-102 调整到 50% 以降低压力" }
+        },
+        {
+          "condition": { "ko": "압력 < 10 bar", "en": "Pressure < 10 bar", "zh": "压力 < 10 bar" },
+          "action": { "ko": "펌프 압력 설정값 확인 및 압력 센서 교정", "en": "Check pump pressure setting and calibrate pressure sensor", "zh": "检查泵压力设定值并校准压力传感器" }
+        }
+      ]
+    },
+    {
+      "id": "pressure_sensor_b",
+      "names": { "ko": "압력 센서 B", "en": "Pressure Sensor B", "zh": "压力传感器 B" },
+      "type": "pressure",
+      "normalRange": { "min": 10, "max": 15 },
+      "unit": "bar",
+      "measures": [
+        {
+          "condition": { "ko": "압력 > 15 bar", "en": "Pressure > 15 bar", "zh": "压力 > 15 bar" },
+          "action": { "ko": "밸브 V-103을 50%로 조정하여 압력 감소", "en": "Adjust valve V-103 to 50% to reduce pressure", "zh": "将阀门 V-103 调整到 50% 以降低压力" }
+        },
+        {
+          "condition": { "ko": "압력 < 10 bar", "en": "Pressure < 10 bar", "zh": "压力 < 10 bar" },
+          "action": { "ko": "펌프 압력 설정값 확인 및 압력 센서 교정", "en": "Check pump pressure setting and calibrate pressure sensor", "zh": "检查泵压力设定值并校准压力传感器" }
+        }
+      ]
+    },
+    {
+      "id": "pressure_sensor_c",
+      "names": { "ko": "압력 센서 C", "en": "Pressure Sensor C", "zh": "压力传感器 C" },
+      "type": "pressure",
+      "normalRange": { "min": 10, "max": 15 },
+      "unit": "bar",
+      "measures": [
+        {
+          "condition": { "ko": "압력 > 15 bar", "en": "Pressure > 15 bar", "zh": "压力 > 15 bar" },
+          "action": { "ko": "밸브 V-104를 50%로 조정하여 압력 감소", "en": "Adjust valve V-104 to 50% to reduce pressure", "zh": "将阀门 V-104 调整到 50% 以降低压力" }
+        },
+        {
+          "condition": { "ko": "압력 < 10 bar", "en": "Pressure < 10 bar", "zh": "压力 < 10 bar" },
+          "action": { "ko": "펌프 압력 설정값 확인 및 압력 센서 교정", "en": "Check pump pressure setting and calibrate pressure sensor", "zh": "检查泵压力设定值并校准压力传感器" }
+        }
+      ]
+    },
+    {
+      "id": "pressure_sensor_d",
+      "names": { "ko": "압력 센서 D", "en": "Pressure Sensor D", "zh": "压力传感器 D" },
+      "type": "pressure",
+      "normalRange": { "min": 10, "max": 15 },
+      "unit": "bar",
+      "measures": [
+        {
+          "condition": { "ko": "압력 > 15 bar", "en": "Pressure > 15 bar", "zh": "压力 > 15 bar" },
+          "action": { "ko": "밸브 V-105를 50%로 조정하여 압력 감소", "en": "Adjust valve V-105 to 50% to reduce pressure", "zh": "将阀门 V-105 调整到 50% 以降低压力" }
+        },
+        {
+          "condition": { "ko": "압력 < 10 bar", "en": "Pressure < 10 bar", "zh": "压力 < 10 bar" },
+          "action": { "ko": "펌프 압력 설정값 확인 및 압력 센서 교정", "en": "Check pump pressure setting and calibrate pressure sensor", "zh": "检查泵压力设定值并校准压力传感器" }
+        }
+      ]
     }
   ]
 }

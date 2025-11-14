@@ -6,9 +6,25 @@ import { useRealtimeAI } from "../hooks/use-realtime-ai"; // ✅ 추가
 
 interface VoiceInputProps {
   onVoiceCommand: (command: string) => void;
+  onAIMessage?: (message: string) => void;
+  currentEquipmentState?: {
+    pump1?: number;
+    pump2?: number;
+    pump3?: number;
+    pump4?: number;
+    temperatureSensorA?: number;
+    temperatureSensorB?: number;
+    flowMeter1?: number;
+    flowMeter2?: number;
+    pressureSensorA?: number;
+    pressureSensorB?: number;
+    pressureSensorC?: number;
+    pressureSensorD?: number;
+    valvePosition?: number;
+  };
 }
 
-export function VoiceInput({ onVoiceCommand }: VoiceInputProps) {
+export function VoiceInput({ onVoiceCommand, onAIMessage, currentEquipmentState }: VoiceInputProps) {
   const { t, i18n } = useTranslation("chat");
   const [inputValue, setInputValue] = useState("");
   const [showQuickCommands, setShowQuickCommands] = useState(false);
@@ -61,7 +77,21 @@ export function VoiceInput({ onVoiceCommand }: VoiceInputProps) {
       // 현재 i18n 언어 사용 (ko, en, zh 중 하나)
       const currentLang = i18n.language || "ko";
       console.log(`[VoiceInput] Starting AI voice call with language: ${currentLang}`);
-      await startCall(currentLang);
+
+      // 음성 메시지 콜백 전달
+      console.log("[VoiceInput] Setting up message callbacks with equipment state:", currentEquipmentState);
+      await startCall(currentLang, {
+        onUserMessage: (text) => {
+          console.log("[VoiceInput] User speech callback triggered:", text);
+          onVoiceCommand(text);
+        },
+        onAIMessage: (text) => {
+          console.log("[VoiceInput] AI response callback triggered:", text);
+          if (onAIMessage) {
+            onAIMessage(text);
+          }
+        },
+      }, currentEquipmentState);
     } catch (err) {
       console.error("[VoiceInput] startCall failed:", err);
     }

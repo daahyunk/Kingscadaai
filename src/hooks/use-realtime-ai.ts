@@ -1,11 +1,9 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 
-type FnMap = {
-  navigateSection: (args: { section: string }) => {
-    success: boolean;
-    section?: string;
-  };
-};
+export interface RealtimeMessageCallback {
+  onUserMessage?: (text: string) => void;
+  onAIMessage?: (text: string) => void;
+}
 
 export function useRealtimeAI() {
   const [isConnecting, setIsConnecting] = useState(false);
@@ -14,28 +12,26 @@ export function useRealtimeAI() {
   const peerRef = useRef<RTCPeerConnection | null>(null);
   const channelRef = useRef<RTCDataChannel | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const messageCallbackRef = useRef<RealtimeMessageCallback>({});
+  const currentResponseRef = useRef<string>("");
 
-  const fns: FnMap = {
-    navigateSection: ({ section }) => {
-      const el = document.getElementById(section);
-      if (!el) return { success: false };
-
-      const rect = el.getBoundingClientRect();
-      const offset =
-        rect.top + window.scrollY - window.innerHeight / 2 + rect.height / 2;
-
-      window.scrollTo({ top: offset, behavior: "smooth" });
-      return { success: true, section };
-    },
-  };
-
-  async function startCall(lang: string = "ko") {
+  async function startCall(
+    lang: string = "ko",
+    callbacks?: RealtimeMessageCallback,
+    equipmentState?: Record<string, number>
+  ) {
     if (isConnecting || isConnected) return;
 
     setIsConnecting(true);
 
     try {
-      console.log(`[Realtime] Starting call for language: ${lang}`);
+      // Store message callbacks
+      if (callbacks) {
+        messageCallbackRef.current = callbacks;
+      }
+      currentResponseRef.current = "";
+
+      console.log(`[Realtime] Starting call for language: ${lang}`, equipmentState);
 
       const audioContext = new AudioContext();
       await audioContext.resume();
@@ -51,7 +47,20 @@ export function useRealtimeAI() {
       }
 
       const API_BASE_URL = (import.meta.env.VITE_API_URL || "").trim();
-      const tokenRes = await fetch(`${API_BASE_URL}/api/session/${lang}`);
+
+      // Build query parameters with all equipment status
+      const params = new URLSearchParams();
+      if (equipmentState) {
+        Object.entries(equipmentState).forEach(([key, value]) => {
+          if (value !== undefined) {
+            params.append(key, value.toString());
+          }
+        });
+      }
+
+      const sessionUrl = `${API_BASE_URL}/api/session/${lang}${params.toString() ? `?${params.toString()}` : ""}`;
+      console.log("[Realtime] Fetching session from:", sessionUrl, "with params:", Object.fromEntries(params));
+      const tokenRes = await fetch(sessionUrl);
       const data = await tokenRes.json();
       const EPHEMERAL_KEY: string | undefined = data?.client_secret?.value;
 
@@ -110,43 +119,6 @@ export function useRealtimeAI() {
 
       ch.onopen = () => {
         console.log("[Realtime] Data channel open ✅");
-
-        // navigateSection tool 등록
-        ch.send(
-          JSON.stringify({
-            type: "session.update",
-            session: {
-              tools: [
-                {
-                  type: "function",
-                  name: "navigateSection",
-                  description:
-                    "Scroll page smoothly to a section (info, announcements, gallery, food, location, program, goods)",
-                  parameters: {
-                    type: "object",
-                    properties: {
-                      section: {
-                        type: "string",
-                        enum: [
-                          "info",
-                          "announcements",
-                          "gallery",
-                          "food",
-                          "location",
-                          "program",
-                          "goods",
-                        ],
-                      },
-                    },
-                    required: ["section"],
-                  },
-                },
-              ],
-            },
-          })
-        );
-
-        // ❌ 초기 인사 제거됨 (서버 instructions가 첫 인사 담당)
         ch.send(JSON.stringify({ type: "response.create" }));
       };
 
@@ -154,26 +126,41 @@ export function useRealtimeAI() {
         try {
           const msg = JSON.parse(ev.data);
 
-          if (
-            msg.type === "response.function_call_arguments.done" &&
-            msg.name in fns
-          ) {
-            const fn = fns[msg.name as keyof FnMap];
-            const args = JSON.parse(msg.arguments);
-            const result = fn(args);
+          // 모든 이벤트 로깅
+          // console.log("[Realtime] onmessage received:", msg.type);
 
-            ch.send(
-              JSON.stringify({
-                type: "conversation.item.create",
-                item: {
-                  type: "function_call_output",
-                  call_id: msg.call_id,
-                  output: JSON.stringify(result),
-                },
-              })
-            );
+          // response.audio_transcript.delta - AI 응답 텍스트 스트리밍
+          if (msg.type === "response.audio_transcript.delta") {
+            if (msg.delta) {
+              currentResponseRef.current += msg.delta;
+              console.log("[Realtime] AI response chunk:", msg.delta);
+            }
+          }
 
-            ch.send(JSON.stringify({ type: "response.create" }));
+          // response.audio_transcript.done - 응답 완료
+          if (msg.type === "response.audio_transcript.done") {
+            console.log("[Realtime] response.audio_transcript.done - full text:", currentResponseRef.current);
+            if (currentResponseRef.current && messageCallbackRef.current.onAIMessage) {
+              console.log("[Realtime] Calling onAIMessage with:", currentResponseRef.current);
+              messageCallbackRef.current.onAIMessage(currentResponseRef.current);
+              currentResponseRef.current = "";
+            }
+          }
+
+          // 사용자 음성 변환 완료 (Whisper STT)
+          if (msg.type === "conversation.item.input_audio_transcription.completed") {
+            console.log("[Realtime] ✅ conversation.item.input_audio_transcription.completed event!", msg);
+            const userText = msg.transcript;
+            console.log("[Realtime] User speech text:", userText);
+            console.log("[Realtime] Text trimmed:", userText?.trim());
+            console.log("[Realtime] onUserMessage callback available:", !!messageCallbackRef.current.onUserMessage);
+
+            if (userText?.trim() && messageCallbackRef.current.onUserMessage) {
+              console.log("[Realtime] 🎤 Calling onUserMessage with:", userText);
+              messageCallbackRef.current.onUserMessage(userText);
+            } else {
+              console.log("[Realtime] ❌ Not calling onUserMessage - text empty or callback missing");
+            }
           }
         } catch (error) {
           console.error("[Realtime] Data channel message error:", error);

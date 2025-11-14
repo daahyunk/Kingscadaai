@@ -97,13 +97,47 @@ async function handleSession(req: Request, res: Response) {
   const greet = greetingByLang(lang);
   const { name: langName } = langMeta(lang);
 
-  const filePath = path.join(process.cwd(), "server", "festival-info.json");
-  if (!fs.existsSync(filePath)) {
-    console.error("❌ [Error] festival-info.json 파일이 없습니다!");
-    return res.status(500).json({ error: "festival-info.json not found" });
+  // 모든 현재 장비 상태 받기
+  const currentEquipmentState: Record<string, number> = {};
+  const equipmentKeys = [
+    "pump1",
+    "pump2",
+    "pump3",
+    "pump4",
+    "temperatureSensorA",
+    "temperatureSensorB",
+    "flowMeter1",
+    "flowMeter2",
+    "pressureSensorA",
+    "pressureSensorB",
+    "pressureSensorC",
+    "pressureSensorD",
+    "valvePosition",
+  ];
+
+  equipmentKeys.forEach((key) => {
+    if (req.query[key]) {
+      currentEquipmentState[key] = parseFloat(req.query[key] as string);
+    }
+  });
+
+  console.log("[Server] Current equipment state:", currentEquipmentState);
+
+  const equipmentFilePath = path.join(process.cwd(), "server", "equipment-info.json");
+  if (!fs.existsSync(equipmentFilePath)) {
+    console.error("❌ [Error] equipment-info.json 파일이 없습니다!");
+    return res.status(500).json({ error: "equipment-info.json not found" });
   }
 
-  const festival = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  let equipmentInfo = JSON.parse(fs.readFileSync(equipmentFilePath, "utf-8"));
+
+  // 현재값을 equipment 정보에 추가
+  if (Object.keys(currentEquipmentState).length > 0) {
+    equipmentInfo = {
+      ...equipmentInfo,
+      currentState: currentEquipmentState,
+    };
+  }
 
   try {
     console.log("⚙️ [Server] OpenAI 세션 생성 시도중...");
@@ -117,16 +151,51 @@ async function handleSession(req: Request, res: Response) {
       body: JSON.stringify({
         model: "gpt-4o-realtime-preview-2024-10-01",
         voice: "alloy",
+        input_audio_transcription: {
+          model: "whisper-1",
+        },
         instructions: `
-            You are the official AI voice assistant for '${festival.name}'.
+            You are the KingSCADA AI voice guidance assistant. You help users monitor and manage equipment in real-time, providing status updates and recommended actions when issues are detected.
 
-            1) On the very first response after the call starts, say exactly one short greeting in ${langName}:
+            Available Equipment:
+${equipmentInfo.equipment
+  .map((eq: any) => {
+    const name = eq.names[lang];
+    const range = eq.normalRange;
+    const measures = eq.measures
+      .map((m: any) => `${m.condition[lang]}: ${m.action[lang]}`)
+      .join(" | ");
+    return `- ${name} (${eq.type}): Normal range ${range.min}-${range.max} ${eq.unit} | Measures: ${measures}`;
+  })
+  .join("\n")}
+
+            Current Equipment Status:
+${equipmentInfo.currentState ? Object.entries(equipmentInfo.currentState)
+  .map(([key, value]) => {
+    if (key === "pump1") return `- Pump 1: ${value} bar`;
+    if (key === "pump2") return `- Pump 2: ${value} bar`;
+    if (key === "pump3") return `- Pump 3: ${value} bar`;
+    if (key === "pump4") return `- Pump 4: ${value} bar`;
+    if (key === "temperatureSensorA") return `- Temperature Sensor A: ${value}°C`;
+    if (key === "temperatureSensorB") return `- Temperature Sensor B: ${value}°C`;
+    if (key === "flowMeter1") return `- Flow Meter 1: ${value} L/min`;
+    if (key === "flowMeter2") return `- Flow Meter 2: ${value} L/min`;
+    if (key === "pressureSensorA") return `- Pressure Sensor A: ${value} bar`;
+    if (key === "pressureSensorB") return `- Pressure Sensor B: ${value} bar`;
+    if (key === "pressureSensorC") return `- Pressure Sensor C: ${value} bar`;
+    if (key === "pressureSensorD") return `- Pressure Sensor D: ${value} bar`;
+    if (key === "valvePosition") return `- Valve Position: ${value}%`;
+    return null;
+  })
+  .filter(Boolean)
+  .join("\n") : "No current status available"}
+
+            Rules:
+            1) On the very first response, say exactly one short greeting in ${langName}:
 "${greet}"
-            2) After that, respond in the same language as the user's input.
-            3) When a question maps to a UI section, call:
-              navigateSection({ section: "<info|announcements|gallery|food|location|program|goods>" })
-            Then speak your answer.
-            Keep your answers concise and friendly.
+            2) Always respond in the same language as the user's input (${langName} in this session).
+            3) When a user asks about equipment status or issues, refer to the current equipment status above and provide specific guidance based on the available equipment information.
+            4) Keep your answers concise and friendly.
         `.trim(),
       }),
     });
