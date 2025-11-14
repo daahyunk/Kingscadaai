@@ -81,7 +81,12 @@ export function serveStatic(app: Express) {
   app.use(express.static(distPath));
 
   // ✅ Express 5 호환: '*' 제거
-  app.use((_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+  // API 요청은 제외하고 SPA를 위해 나머지 요청은 index.html로 라우팅
+  app.use((req, res) => {
+    if (req.path.startsWith("/api")) {
+      res.status(404).json({ error: "API endpoint not found" });
+    } else {
+      res.sendFile(path.resolve(distPath, "index.html"));
+    }
   });
 }
