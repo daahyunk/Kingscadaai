@@ -34,8 +34,14 @@ This is an AI-powered voice chatbot application for the Siheung Gaetgol Festival
 - Festival information stored in `server/festival-info.json`
 
 ## Environment Variables
-Required secrets (managed via Replit Secrets):
+
+### Backend (Replit Secrets)
 - `OPENAI_API_KEY`: OpenAI API key for Realtime API access
+
+### Frontend (Vercel Environment Variables)
+- `VITE_API_URL`: Replit backend URL (production only)
+  - **로컬 개발**: 비워두기 (Vite proxy 사용)
+  - **Vercel 배포**: `https://kingscadaai-1-0baek056.replit.app`
 
 ## Running the Application
 
@@ -63,6 +69,17 @@ Note: Frontend build is handled by Vercel separately.
   - Backend deployed on Replit (API-only, no static files)
   - CORS allows cross-origin requests from Vercel domain
 - Backend API endpoints available at `/api/*`
+
+## Vercel Deployment Setup
+**중요: Vercel 프론트엔드에서 Replit 백엔드를 호출하려면 환경변수 설정이 필요합니다!**
+
+1. Vercel 대시보드 접속
+2. 프로젝트 설정 → Environment Variables
+3. 다음 변수 추가:
+   - **Name**: `VITE_API_URL`
+   - **Value**: `https://kingscadaai-1-0baek056.replit.app`
+   - **Environment**: Production (또는 모든 환경)
+4. Redeploy 실행
 
 ## Testing Voice Feature
 The voice assistant can be tested via the "대화" (Chat) tab:
