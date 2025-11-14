@@ -73,7 +73,7 @@
             "vite": "^6.3.5"
       },
       "scripts": {
-            "dev": "concurrently \"vite --port 3000\" \"tsx server/index.ts\"",
+            "dev": "concurrently \"vite --host 0.0.0.0 --port 5000\" \"tsx server/index.ts\"",
             "build": "vite build",
             "start": "node dist/public/index.js"
       }
