@@ -58,7 +58,7 @@ export function useRealtimeAI() {
       }
 
       // 서버 세션 호출 - 환경변수 사용 (Vercel 배포 시 Replit 백엔드 URL)
-      const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+      const API_BASE_URL = (import.meta.env.VITE_API_URL || '').trim();
       const tokenRes = await fetch(`${API_BASE_URL}/api/session/${lang}`);
       const data = await tokenRes.json();
       const EPHEMERAL_KEY: string | undefined =
