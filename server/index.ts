@@ -1,6 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { serveStatic, log } from "./vite";
 
 const app = express();
 app.use(express.json());
@@ -47,9 +47,8 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
+  // 프로덕션 환경에서만 정적 파일 제공
+  if (process.env.NODE_ENV === "production") {
     serveStatic(app);
   }
 
