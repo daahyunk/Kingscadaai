@@ -58,13 +58,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(data);
   });
 
-  // ✅ 방법1: /session + /session/:lang 두 개로 분리 (Express 5 호환)
-  app.get("/session", async (req: Request, res: Response) => {
+  // ✅ 방법1: /api/session + /api/session/:lang 두 개로 분리 (Express 5 호환)
+  app.get("/api/session", async (req: Request, res: Response) => {
     req.params.lang = "ko"; // 기본 언어를 ko로 설정
     await handleSession(req, res);
   });
 
-  app.get("/session/:lang", async (req: Request, res: Response) => {
+  app.get("/api/session/:lang", async (req: Request, res: Response) => {
     await handleSession(req, res);
   });
 

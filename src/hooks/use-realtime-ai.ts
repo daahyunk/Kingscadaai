@@ -58,7 +58,7 @@ export function useRealtimeAI() {
       }
 
       // 서버 세션 호출
-      const tokenRes = await fetch(`http://localhost:8080/session/${lang}`);
+      const tokenRes = await fetch(`/api/session/${lang}`);
       const data = await tokenRes.json();
       const EPHEMERAL_KEY: string | undefined =
         data?.client_secret?.value;
