@@ -164,84 +164,73 @@ export function VoiceInput({
       {/* ⭐ 하단 음성 입력바 */}
       <div className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur border-t border-slate-800 px-4 py-4 z-30">
         <div className="max-w-6xl mx-auto">
-          {/* 연결 중 UI */}
-          {isConnecting && (
-            <div className="mb-4 flex flex-col items-center gap-3">
-              <div className="flex items-end justify-center gap-1 h-12">
-                {[...Array(7)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="w-1 bg-gradient-to-t from-blue-500 to-blue-300 rounded-full transition-all duration-150"
-                    style={{
-                      height: `${12 + Math.sin(Date.now() / 100 + i) * 16}px`,
-                      animation: `wave 0.6s ease-in-out infinite`,
-                      animationDelay: `${i * 0.1}s`,
-                    }}
-                  />
-                ))}
-              </div>
-              <div className="text-center">
-                <p className="text-sm font-medium text-blue-400">
-                  {t("common:voiceConnecting")}
-                </p>
-                <p className="text-xs text-slate-400 mt-1">마이크 준비 중...</p>
-              </div>
-            </div>
-          )}
-
-          {/* 연결됨 UI */}
-          {isConnected && (
-            <div className="mb-4 flex flex-col items-center gap-3">
-              <div className="flex items-end justify-center gap-1.5 h-12">
-                {volumeBars.map((height, i) => (
-                  <div
-                    key={i}
-                    className="w-1.5 bg-gradient-to-t from-emerald-500 to-emerald-300 rounded-sm transition-all duration-150"
-                    style={{
-                      height: `${height * 40}px`,
-                    }}
-                  />
-                ))}
-              </div>
-              <div className="text-center">
-                <p className="text-sm font-medium text-emerald-400 flex items-center justify-center gap-2">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                  </span>
-                  {t("common:voiceConnected")}
-                </p>
-                <p className="text-xs text-slate-400 mt-1">
-                  AI 음성 안내 중...
-                </p>
-              </div>
-            </div>
-          )}
 
           <div className="flex items-center gap-2">
-            {/* 빠른 명령 버튼 */}
-            <Button
-              onClick={() => setShowQuickCommands(!showQuickCommands)}
-              variant="outline"
-              size="icon"
-              className="flex-shrink-0 bg-slate-800 border-slate-700 hover:bg-slate-700 text-slate-300"
-            >
-              <Sparkles className="w-5 h-5" />
-            </Button>
+            {/* 음성 안내 중이 아닐 때: 빠른 명령, 입력, 전송 */}
+            {!isConnected && (
+              <>
+                <Button
+                  onClick={() => setShowQuickCommands(!showQuickCommands)}
+                  variant="outline"
+                  size="icon"
+                  className="flex-shrink-0 bg-slate-800 border-slate-700 hover:bg-slate-700 text-slate-300"
+                >
+                  <Sparkles className="w-5 h-5" />
+                </Button>
 
-            {/* 텍스트 입력 */}
-            <div className="flex-1 relative">
-              <input
-                ref={inputRef}
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder={t("common:inputPlaceholder")}
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none"
-                style={{ fontSize: "16px" }}
-              />
-            </div>
+                <div className="flex-1 relative">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder={t("common:inputPlaceholder")}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none"
+                    style={{ fontSize: "16px" }}
+                  />
+                </div>
+
+                <Button
+                  onClick={handleSend}
+                  size="icon"
+                  className="flex-shrink-0 bg-slate-700 hover:bg-slate-600"
+                  disabled={!inputValue.trim()}
+                >
+                  <Send className="w-5 h-5" />
+                </Button>
+              </>
+            )}
+
+            {/* 음성 안내 중일 때: 세련된 유동적 gradient 애니메이션 */}
+            {isConnected && (
+              <div className="flex-1 flex items-center justify-center h-12 relative overflow-hidden rounded-lg">
+                {/* 배경 subtle glow */}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-blue-400/10 to-blue-500/5 rounded-lg" />
+
+                {/* 부드러운 flowing gradient lines */}
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="absolute w-full h-1.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent rounded-full"
+                    style={{
+                      animation: `flowingGradient ${1.8 + i * 0.3}s cubic-bezier(0.45, 0, 0.55, 1) infinite`,
+                      opacity: 0.7 - i * 0.18,
+                      filter: `blur(${i * 0.8}px)`,
+                      mixBlendMode: "screen",
+                    }}
+                  />
+                ))}
+
+                {/* 중앙 accent pulse */}
+                <div
+                  className="relative w-1 h-8 bg-gradient-to-b from-blue-300 to-blue-500 rounded-full shadow-lg shadow-blue-500/50"
+                  style={{
+                    animation: `centerPulse 2s ease-in-out infinite`,
+                  }}
+                />
+              </div>
+            )}
 
             {/* 🎙️ 마이크 버튼 */}
             <div className="relative">
@@ -274,16 +263,6 @@ export function VoiceInput({
                 </div>
               )}
             </div>
-
-            {/* 전송 버튼 */}
-            <Button
-              onClick={handleSend}
-              size="icon"
-              className="flex-shrink-0 bg-slate-700 hover:bg-slate-600"
-              disabled={!inputValue.trim()}
-            >
-              <Send className="w-5 h-5" />
-            </Button>
           </div>
         </div>
       </div>

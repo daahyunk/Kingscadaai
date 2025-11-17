@@ -174,3 +174,28 @@ html {
 *::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
+
+/* 세련된 flowing gradient 애니메이션 */
+@keyframes flowingGradient {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* 중앙 accent 부드러운 pulse */
+@keyframes centerPulse {
+  0%, 100% {
+    opacity: 0.6;
+    boxShadow: 0 0 8px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    opacity: 1;
+    boxShadow: 0 0 16px rgba(59, 130, 246, 0.6);
+  }
+}

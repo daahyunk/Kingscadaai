@@ -22,19 +22,6 @@ export function ChatInterface({
     null
   );
 
-  // 새로운 equipmentDetailId 메시지가 들어오면 자동으로 펼치기
-  useEffect(() => {
-    if (messages.length > 0) {
-      // 가장 최신 메시지부터 확인
-      for (let i = messages.length - 1; i >= 0; i--) {
-        if (messages[i].equipmentDetailId) {
-          setExpandedEquipment(messages[i].equipmentDetailId);
-          return;
-        }
-      }
-    }
-  }, [messages]);
-
   // i18n 언어 코드를 locale 형식으로 변환
   const getLocale = () => {
     const langMap: Record<string, string> = {
@@ -152,6 +139,11 @@ export function ChatInterface({
                         </p>
                       </div>
                     )}
+
+                    {/* 안내 팁 */}
+                    <p className="text-xs text-slate-400 mb-2 px-1">
+                      💡 카드를 클릭하면 자세한 정보를 확인할 수 있습니다.
+                    </p>
 
                     {/* 장비 카드 - 말풍선 스타일 */}
                     <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 overflow-hidden">
