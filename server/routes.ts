@@ -196,9 +196,16 @@ IMPORTANT RULES:
 - NEVER speak or pronounce any system markers such as "[EQUIPMENT_DETAIL:xxx]".
 - System markers are ONLY for the client UI card detection, not for speech.
 - When describing equipment status, speak naturally and do not include brackets, codes, IDs, or tags in your spoken output.
-- After finishing the spoken response, append the marker ONLY in the text output (not TTS). Example:
+- ALWAYS append equipment detail markers in the text output. Example:
   Spoken: "펌프 3의 압력이 정상 범위 내입니다."
   Text output: "펌프 3의 압력이 정상 범위 내입니다. [EQUIPMENT_DETAIL:pump3]"
+
+MARKER USAGE FOR ALL LANGUAGES:
+- You MUST use [EQUIPMENT_DETAIL:equipmentId] markers in your text output for every equipment you discuss.
+- If user asks about multiple equipment (e.g., "전체 장비 설명해줘" or "Tell me about all pumps" or "请描述所有设备"),
+  append MULTIPLE markers, one for each equipment. Example:
+  "펌프 1, 2, 3의 상태입니다. [EQUIPMENT_DETAIL:pump1] [EQUIPMENT_DETAIL:pump2] [EQUIPMENT_DETAIL:pump3]"
+- This rule applies to ${langName} and all supported languages equally.
 
 FIRST RESPONSE RULE:
 - On the FIRST response of the session, output ONLY this greeting in ${langName}, spoken naturally:
@@ -208,6 +215,7 @@ Do NOT describe any equipment on the first response.
 
 WHEN USER ASKS ABOUT EQUIPMENT:
 - Provide an accurate description of the current status.
+- ALWAYS append [EQUIPMENT_DETAIL:equipmentId] marker(s) after describing the equipment.
 - Use equipmentInfo below.
 
 AVAILABLE EQUIPMENT:

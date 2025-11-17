@@ -19,7 +19,7 @@ export interface Message {
   timestamp: Date;
   translationKey?: string;
   translationParams?: Record<string, string | number>;
-  equipmentDetailId?: string;
+  equipmentDetailIds?: string[];
 }
 
 export interface AlarmData {
@@ -210,17 +210,17 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
     setMessages((prev) => [...prev, aiMessage]);
   };
 
-  const handleEquipmentDetail = (equipmentId: string) => {
-    console.log("[App] handleEquipmentDetail called with:", equipmentId);
-    // 마지막 system 메시지에 equipmentDetailId 추가
+  const handleEquipmentDetail = (equipmentIds: string[]) => {
+    console.log("[App] handleEquipmentDetail called with:", equipmentIds);
+    // 마지막 system 메시지에 equipmentDetailIds 추가
     setMessages((prev) => {
       const newMessages = [...prev];
-      // 뒤에서부터 가장 최근의 system 메시지를 찾아서 equipmentDetailId 추가
+      // 뒤에서부터 가장 최근의 system 메시지를 찾아서 equipmentDetailIds 추가
       for (let i = newMessages.length - 1; i >= 0; i--) {
         if (newMessages[i].type === "system") {
           newMessages[i] = {
             ...newMessages[i],
-            equipmentDetailId: equipmentId,
+            equipmentDetailIds: equipmentIds,
           };
           break;
         }

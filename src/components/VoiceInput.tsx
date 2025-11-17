@@ -7,7 +7,7 @@ import { useRealtimeAI } from "../hooks/use-realtime-ai";
 interface VoiceInputProps {
   onVoiceCommand: (command: string) => void;
   onAIMessage?: (message: string) => void;
-  onEquipmentDetail?: (equipmentId: string) => void;
+  onEquipmentDetail?: (equipmentIds: string[]) => void;
   currentEquipmentState?: Record<string, number>;
 }
 

@@ -14,7 +14,7 @@ export type Lang = "ko" | "en" | "zh";
 export interface RealtimeMessageCallback {
   onUserMessage?: (text: string) => void;
   onAIMessage?: (text: string) => void;
-  onEquipmentDetail?: (equipmentId: string) => void;
+  onEquipmentDetail?: (equipmentIds: string[]) => void;
 }
 
 export function useRealtimeAI() {
@@ -229,14 +229,19 @@ export function useRealtimeAI() {
 
             if (!full) return;
 
-            const match = full.match(/\[EQUIPMENT_DETAIL:(\w+)\]/);
-            const equipId = match?.[1] || null;
+            // 모든 마크 추출 (여러 개)
+            const equipmentMatches = full.matchAll(/\[EQUIPMENT_DETAIL:(\w+)\]/g);
+            const equipmentIds = Array.from(equipmentMatches).map(m => m[1]);
+
+            // 마크 제거
             const clean = full.replace(/\[EQUIPMENT_DETAIL:\w+\]/g, "").trim();
 
             lastAssistantTextRef.current = clean;
             messageCallbackRef.current.onAIMessage?.(clean);
-            if (equipId)
-              messageCallbackRef.current.onEquipmentDetail?.(equipId);
+
+            // 추출된 카드들이 있으면 모두 전달
+            if (equipmentIds.length > 0)
+              messageCallbackRef.current.onEquipmentDetail?.(equipmentIds);
           }
 
           // ---------------- 사용자 STT ----------------

@@ -73,119 +73,125 @@ export function ChatInterface({
 
       <div className="space-y-4">
         {messages.map((message) => {
-          // equipmentDetailId가 있는 메시지에서 카드 렌더링
-          if (message.equipmentDetailId) {
-            const equipInfo = getEquipmentInfo(message.equipmentDetailId);
-            if (equipInfo) {
-              const currentValue =
-                equipmentStatus[message.equipmentDetailId] ||
-                equipInfo.normalRange.max;
-              const equipmentType = getEquipmentType(message.equipmentDetailId);
-              const status = getEquipmentStatus(
-                message.equipmentDetailId,
-                currentValue,
-                equipInfo.normalRange.max
-              );
-
-              // 장비 타입에 따라 추가 파라미터 설정
-              const additionalParams = [];
-              if (
-                message.equipmentDetailId.includes("pump") &&
-                equipmentStatus.valvePosition
-              ) {
-                additionalParams.push({
-                  label: t("monitoring:valveAdjustment") || "Valve Position",
-                  value: equipmentStatus.valvePosition.toString(),
-                  unit: "%",
-                });
-              }
-
-              // 장비별 히스토리 데이터 준비
-              let historyData: Array<{ time: string; value: number }> = [];
-              if (equipmentType === "pump" && pressureHistory.length > 0) {
-                historyData = pressureHistory.map((item) => ({
-                  time: item.time,
-                  value: item.pressure,
-                }));
-              }
-
-              // 히스토리가 없으면 현재값으로 기본 데이터 생성
-              if (historyData.length === 0) {
-                historyData = [
-                  {
-                    time: "Now",
-                    value: currentValue,
-                  },
-                ];
-              }
-
-              return (
-                <div
-                  key={message.id}
-                  className="flex gap-3"
-                >
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-slate-700">
-                    <Bot className="w-4 h-4" />
-                  </div>
-
-                  <div className="flex-1">
-                    {/* AI 응답 텍스트 */}
-                    {message.content && (
-                      <div className="inline-block max-w-[85%] rounded-lg px-4 py-2.5 bg-slate-800 text-slate-200 mb-3">
-                        <p className="whitespace-pre-wrap text-sm">
-                          {message.translationKey
-                            ? t(message.translationKey, message.translationParams)
-                            : message.content}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* 안내 팁 */}
-                    <p className="text-xs text-slate-400 mb-2 px-1">
-                      💡 카드를 클릭하면 자세한 정보를 확인할 수 있습니다.
-                    </p>
-
-                    {/* 장비 카드 - 말풍선 스타일 */}
-                    <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 overflow-hidden">
-                      <EquipmentCardWithDetail
-                        equipment={{
-                          id: 1,
-                          name:
-                            equipInfo.names[i18n.language] ||
-                            equipInfo.names.ko,
-                          type: equipmentType,
-                          status,
-                          value: currentValue,
-                          unit: equipInfo.unit,
-                          threshold: equipInfo.normalRange.max,
-                        }}
-                        isExpanded={expandedEquipment === message.equipmentDetailId}
-                        onToggle={() =>
-                          setExpandedEquipment(
-                            expandedEquipment === message.equipmentDetailId
-                              ? null
-                              : message.equipmentDetailId
-                          )
-                        }
-                        historyData={historyData}
-                        additionalParams={
-                          additionalParams.length > 0
-                            ? additionalParams
-                            : undefined
-                        }
-                      />
-                    </div>
-
-                    <p className="text-xs text-slate-500 mt-1 px-1">
-                      {message.timestamp.toLocaleTimeString(getLocale(), {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
+          // equipmentDetailIds가 있는 메시지에서 여러 카드 렌더링
+          if (message.equipmentDetailIds && message.equipmentDetailIds.length > 0) {
+            return (
+              <div
+                key={message.id}
+                className="flex gap-3"
+              >
+                <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-slate-700">
+                  <Bot className="w-4 h-4" />
                 </div>
-              );
-            }
+
+                <div className="flex-1">
+                  {/* AI 응답 텍스트 */}
+                  {message.content && (
+                    <div className="inline-block max-w-[85%] rounded-lg px-4 py-2.5 bg-slate-800 text-slate-200 mb-3">
+                      <p className="whitespace-pre-wrap text-sm">
+                        {message.translationKey
+                          ? t(message.translationKey, message.translationParams)
+                          : message.content}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* 안내 팁 */}
+                  <p className="text-xs text-slate-400 mb-2 px-1">
+                    💡 카드를 클릭하면 자세한 정보를 확인할 수 있습니다.
+                  </p>
+
+                  {/* 여러 장비 카드 표시 */}
+                  <div className="space-y-3">
+                    {message.equipmentDetailIds.map((equipmentId) => {
+                      const equipInfo = getEquipmentInfo(equipmentId);
+                      if (!equipInfo) return null;
+
+                      const currentValue =
+                        equipmentStatus[equipmentId] ||
+                        equipInfo.normalRange.max;
+                      const equipmentType = getEquipmentType(equipmentId);
+                      const status = getEquipmentStatus(
+                        equipmentId,
+                        currentValue,
+                        equipInfo.normalRange.max
+                      );
+
+                      // 장비 타입에 따라 추가 파라미터 설정
+                      const additionalParams = [];
+                      if (
+                        equipmentId.includes("pump") &&
+                        equipmentStatus.valvePosition
+                      ) {
+                        additionalParams.push({
+                          label: t("monitoring:valveAdjustment") || "Valve Position",
+                          value: equipmentStatus.valvePosition.toString(),
+                          unit: "%",
+                        });
+                      }
+
+                      // 장비별 히스토리 데이터 준비
+                      let historyData: Array<{ time: string; value: number }> = [];
+                      if (equipmentType === "pump" && pressureHistory.length > 0) {
+                        historyData = pressureHistory.map((item) => ({
+                          time: item.time,
+                          value: item.pressure,
+                        }));
+                      }
+
+                      // 히스토리가 없으면 현재값으로 기본 데이터 생성
+                      if (historyData.length === 0) {
+                        historyData = [
+                          {
+                            time: "Now",
+                            value: currentValue,
+                          },
+                        ];
+                      }
+
+                      return (
+                        <div key={equipmentId} className="bg-slate-800 border border-slate-700 rounded-lg p-4 overflow-hidden">
+                          <EquipmentCardWithDetail
+                            equipment={{
+                              id: 1,
+                              name:
+                                equipInfo.names[i18n.language] ||
+                                equipInfo.names.ko,
+                              type: equipmentType,
+                              status,
+                              value: currentValue,
+                              unit: equipInfo.unit,
+                              threshold: equipInfo.normalRange.max,
+                            }}
+                            isExpanded={expandedEquipment === equipmentId}
+                            onToggle={() =>
+                              setExpandedEquipment(
+                                expandedEquipment === equipmentId
+                                  ? null
+                                  : equipmentId
+                              )
+                            }
+                            historyData={historyData}
+                            additionalParams={
+                              additionalParams.length > 0
+                                ? additionalParams
+                                : undefined
+                            }
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <p className="text-xs text-slate-500 mt-1 px-1">
+                    {message.timestamp.toLocaleTimeString(getLocale(), {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+              </div>
+            );
           }
 
           // 일반 메시지 렌더링
