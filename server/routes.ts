@@ -5,66 +5,110 @@ import path from "path";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
 
-dotenv.config();
+// .env 파일 경로를 명시적으로 지정
+const envPath = path.join(process.cwd(), ".env");
+console.log("📂 [dotenv] .env 경로:", envPath);
+console.log("📂 [dotenv] .env 파일 존재 여부:", fs.existsSync(envPath));
 
-// 🔸 언어 타입 정의
+const result = dotenv.config({ path: envPath });
+if (result.error) {
+  console.error("❌ [dotenv] .env 로드 실패:", result.error);
+} else {
+  console.log("✅ [dotenv] .env 로드 완료");
+  console.log("🔑 [dotenv] OPENAI_API_KEY 존재:", !!process.env.OPENAI_API_KEY);
+}
+
+// ----------------------------------------------
+// 언어 타입 & 유틸
+// ----------------------------------------------
 type Lang = "ko" | "en" | "zh";
+const SUPPORTED_LANGS: Lang[] = ["ko", "en", "zh"];
 
 function resolveLang(input?: string): Lang {
   const l = (input || "").toLowerCase();
-  if (l === "en" || l === "zh") return l;
-  return "ko";
+  return (SUPPORTED_LANGS as string[]).includes(l) ? (l as Lang) : "ko";
 }
 
-// 🔸 언어별 인사말
 function greetingByLang(lang: Lang) {
   switch (lang) {
     case "en":
-      return `Hello! I'm the KingSCADA AI assistant. If you need to check anything about your equipment, just let me know. I'll quickly review the situation and guide you with the right actions.`;
+      return `Hello! I'm the KingSCADA AI assistant. Feel free to ask about any equipment status or operations.`;
     case "zh":
-      return `你好！我是 KingSCADA AI。如果你想了解设备相关情况或需要确认什么，随时告诉我。我会迅速了解状况，并给出相应的处理建议。`;
+      return `你好！我是 KingSCADA AI。如果你想了解设备状态或需要确认任何内容，请随时告诉我。`;
     default:
-      return `안녕하세요! 킹스카다 AI입니다. 설비에 관련해 궁금한 점이나 확인이 필요하시면 말씀해 주세요. 바로 상황을 파악해 필요한 조치를 안내해드릴게요.`;
+      return `안녕하세요! 킹스카다 AI입니다. 설비 상태나 점검이 필요하시면 언제든지 말씀해주세요.`;
   }
 }
 
 function langMeta(lang: Lang) {
-  switch (lang) {
-    case "en":
-      return { name: "English", code: "en" };
-    case "zh":
-      return { name: "Chinese", code: "zh" };
-    default:
-      return { name: "Korean", code: "ko" };
-  }
+  return {
+    ko: { name: "Korean" },
+    en: { name: "English" },
+    zh: { name: "Chinese" },
+  }[lang];
 }
 
+// ----------------------------------------------
+// Request params 타입 (lang 포함)
+// ----------------------------------------------
+type LangParams = { lang?: string };
+
+// ----------------------------------------------
+// equipment-info.json 캐싱
+// ----------------------------------------------
+let EQUIP_INFO_CACHE: any | null = null;
+
+function loadEquipmentInfo() {
+  if (EQUIP_INFO_CACHE) return EQUIP_INFO_CACHE;
+
+  const filePath = path.join(process.cwd(), "server", "equipment-info.json");
+  if (!fs.existsSync(filePath)) {
+    throw new Error("equipment-info.json not found");
+  }
+
+  const json = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  EQUIP_INFO_CACHE = json;
+  return json;
+}
+
+// ----------------------------------------------
+// 라우트 등록
+// ----------------------------------------------
 export async function registerRoutes(app: Express): Promise<Server> {
-  console.log("✅ [Server] registerRoutes 시작됨");
+  console.log("🚀 KingSCADA routes initializing…");
 
-  // 🔹 축제 정보 제공 (테스트용)
+  // (테스트용) festival 정보
   app.get("/festival", (_req: Request, res: Response) => {
-    const filePath = path.join(process.cwd(), "server", "festival-info.json");
-    if (!fs.existsSync(filePath)) {
-      console.error("❌ [Error] festival-info.json 파일이 없습니다!");
-      return res.status(500).json({ error: "festival-info.json not found" });
+    try {
+      const filePath = path.join(process.cwd(), "server", "festival-info.json");
+      if (!fs.existsSync(filePath)) {
+        throw new Error("festival-info.json missing");
+      }
+      const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+      res.json(data);
+    } catch (err: any) {
+      console.error("❌ /festival error:", err.message);
+      res.status(500).json({ error: err.message });
     }
-
-    const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-    res.json(data);
   });
 
-  // ✅ 방법1: /api/session + /api/session/:lang 두 개로 분리 (Express 5 호환)
-  app.get("/api/session", async (req: Request, res: Response) => {
-    req.params.lang = "ko"; // 기본 언어를 ko로 설정
-    await handleSession(req, res);
-  });
+  // 기본 언어: ko
+  app.get(
+    "/api/session",
+    (req: Request<LangParams>, res: Response) => {
+      handleSession(req, res, "ko");
+    }
+  );
 
-  app.get("/api/session/:lang", async (req: Request, res: Response) => {
-    await handleSession(req, res);
-  });
+  // /api/session/:lang
+  app.get(
+    "/api/session/:lang",
+    (req: Request<LangParams>, res: Response) => {
+      handleSession(req, res);
+    }
+  );
 
-  // 🔹 다운로드 API (테스트용)
+  // (테스트용) 다운로드
   app.get("/api/download-pamphlet", (_req: Request, res: Response) => {
     const filePath = path.join(
       process.cwd(),
@@ -79,67 +123,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
-  console.log("✅ [Server] registerRoutes 완료됨");
+  console.log("✅ KingSCADA routes ready");
   return httpServer;
 }
 
-// ✅ 공통 세션 처리 함수
-async function handleSession(req: Request, res: Response) {
-  console.log("🛰️ [Server] /session 요청 받음");
-
-  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-  if (!OPENAI_API_KEY) {
-    console.error("❌ [Error] .env에 OPENAI_API_KEY가 없습니다!");
-    return res.status(500).json({ error: "Missing OPENAI_API_KEY" });
-  }
-
-  const lang = resolveLang(req.params.lang);
-  const greet = greetingByLang(lang);
-  const { name: langName } = langMeta(lang);
-
-  // 모든 현재 장비 상태 받기
-  const currentEquipmentState: Record<string, number> = {};
-  const equipmentKeys = [
-    "pump1",
-    "pump2",
-    "pump3",
-    "pump4",
-    "temperatureSensorA",
-    "temperatureSensorB",
-    "flowMeter1",
-    "flowMeter2",
-    "pressureSensorA",
-    "pressureSensorB",
-    "pressureSensorC",
-    "pressureSensorD",
-    "valvePosition",
-  ];
-
-  equipmentKeys.forEach((key) => {
-    if (req.query[key]) {
-      currentEquipmentState[key] = parseFloat(req.query[key] as string);
-    }
-  });
-
-  console.log("[Server] Current equipment state:", currentEquipmentState);
-
-  const equipmentFilePath = path.join(process.cwd(), "server", "equipment-info.json");
-  if (!fs.existsSync(equipmentFilePath)) {
-    console.error("❌ [Error] equipment-info.json 파일이 없습니다!");
-    return res.status(500).json({ error: "equipment-info.json not found" });
-  }
-
-  let equipmentInfo = JSON.parse(fs.readFileSync(equipmentFilePath, "utf-8"));
-
-  // 현재값을 equipment 정보에 추가
-  if (Object.keys(currentEquipmentState).length > 0) {
-    equipmentInfo = {
-      ...equipmentInfo,
-      currentState: currentEquipmentState,
-    };
-  }
-
+// ----------------------------------------------
+// 공통 세션 처리
+// ----------------------------------------------
+async function handleSession(
+  req: Request<LangParams>,
+  res: Response,
+  defaultLang: Lang = "ko"
+) {
   try {
+    console.log("🛰️ [Server] /api/session 요청 받음");
+
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+    if (!OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY missing in .env");
+    }
+
+    // URL params 또는 기본 언어
+    const lang = resolveLang(req.params.lang ?? defaultLang);
+    const greet = greetingByLang(lang);
+    const { name: langName } = langMeta(lang);
+
+    // 1) 쿼리에서 현재 장비 상태 읽기
+    const currentEquipmentState: Record<string, number> = {};
+    const equipmentKeys = [
+      "pump1",
+      "pump2",
+      "pump3",
+      "pump4",
+      "temperatureSensorA",
+      "temperatureSensorB",
+      "flowMeter1",
+      "flowMeter2",
+      "pressureSensorA",
+      "pressureSensorB",
+      "pressureSensorC",
+      "pressureSensorD",
+      "valvePosition",
+    ] as const;
+
+    equipmentKeys.forEach((key) => {
+      const raw = req.query[key];
+      if (raw !== undefined) {
+        const num = parseFloat(raw as string);
+        if (!isNaN(num)) {
+          currentEquipmentState[key] = num;
+        }
+      }
+    });
+
+    console.log("[Server] Current equipment state:", currentEquipmentState);
+
+    // 2) equipment-info.json 로드 + currentState 병합
+    const baseEquipmentInfo = loadEquipmentInfo();
+    const equipmentInfo = {
+      ...baseEquipmentInfo,
+      ...(Object.keys(currentEquipmentState).length > 0
+        ? { currentState: currentEquipmentState }
+        : {}),
+    };
+
+    // 3) instructions 구성 (태그는 말하지 말고 텍스트에만 붙이는 규칙 포함)
+    const instructions = `
+You are the KingSCADA AI voice assistant. Provide clear, concise, safe guidance about industrial equipment based on the user's questions.
+
+IMPORTANT RULES:
+- Respond ONLY in ${langName}.
+- NEVER speak or pronounce any system markers such as "[EQUIPMENT_DETAIL:xxx]".
+- System markers are ONLY for the client UI card detection, not for speech.
+- When describing equipment status, speak naturally and do not include brackets, codes, IDs, or tags in your spoken output.
+- After finishing the spoken response, append the marker ONLY in the text output (not TTS). Example:
+  Spoken: "펌프 3의 압력이 정상 범위 내입니다."
+  Text output: "펌프 3의 압력이 정상 범위 내입니다. [EQUIPMENT_DETAIL:pump3]"
+
+FIRST RESPONSE RULE:
+- On the FIRST response of the session, output ONLY this greeting in ${langName}, spoken naturally:
+"${greet}"
+
+Do NOT describe any equipment on the first response.
+
+WHEN USER ASKS ABOUT EQUIPMENT:
+- Provide an accurate description of the current status.
+- Use equipmentInfo below.
+
+AVAILABLE EQUIPMENT:
+${equipmentInfo.equipment
+  .map((eq: any) => {
+    const name = eq.names[lang];
+    const range = eq.normalRange;
+    const measures = eq.measures
+      .map((m: any) => `${m.condition[lang]} → ${m.action[lang]}`)
+      .join(" | ");
+    return `- ${name} (${eq.type}): Normal ${range.min}-${range.max}${eq.unit} | Measures: ${measures}`;
+  })
+  .join("\n")}
+
+CURRENT EQUIPMENT STATUS:
+${
+  equipmentInfo.currentState
+    ? Object.entries(equipmentInfo.currentState)
+        .map(([k, v]) => `- ${k}: ${v}`)
+        .join("\n")
+    : "No live sensor values provided"
+}
+`.trim();
+
+    // 4) OpenAI Realtime Session 생성
     console.log("⚙️ [Server] OpenAI 세션 생성 시도중...");
 
     const resp = await fetch("https://api.openai.com/v1/realtime/sessions", {
@@ -149,71 +242,28 @@ async function handleSession(req: Request, res: Response) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-realtime-preview-2024-10-01",
+        model: "gpt-4o-realtime-preview-2025-06-03",
         voice: "alloy",
         input_audio_transcription: {
           model: "whisper-1",
         },
-        instructions: `
-            You are the KingSCADA AI voice guidance assistant. You help users monitor and manage equipment in real-time, providing status updates and recommended actions when issues are detected.
-
-            Available Equipment:
-${equipmentInfo.equipment
-  .map((eq: any) => {
-    const name = eq.names[lang];
-    const range = eq.normalRange;
-    const measures = eq.measures
-      .map((m: any) => `${m.condition[lang]}: ${m.action[lang]}`)
-      .join(" | ");
-    return `- ${name} (${eq.type}): Normal range ${range.min}-${range.max} ${eq.unit} | Measures: ${measures}`;
-  })
-  .join("\n")}
-
-            Current Equipment Status:
-${equipmentInfo.currentState ? Object.entries(equipmentInfo.currentState)
-  .map(([key, value]) => {
-    if (key === "pump1") return `- Pump 1: ${value} bar`;
-    if (key === "pump2") return `- Pump 2: ${value} bar`;
-    if (key === "pump3") return `- Pump 3: ${value} bar`;
-    if (key === "pump4") return `- Pump 4: ${value} bar`;
-    if (key === "temperatureSensorA") return `- Temperature Sensor A: ${value}°C`;
-    if (key === "temperatureSensorB") return `- Temperature Sensor B: ${value}°C`;
-    if (key === "flowMeter1") return `- Flow Meter 1: ${value} L/min`;
-    if (key === "flowMeter2") return `- Flow Meter 2: ${value} L/min`;
-    if (key === "pressureSensorA") return `- Pressure Sensor A: ${value} bar`;
-    if (key === "pressureSensorB") return `- Pressure Sensor B: ${value} bar`;
-    if (key === "pressureSensorC") return `- Pressure Sensor C: ${value} bar`;
-    if (key === "pressureSensorD") return `- Pressure Sensor D: ${value} bar`;
-    if (key === "valvePosition") return `- Valve Position: ${value}%`;
-    return null;
-  })
-  .filter(Boolean)
-  .join("\n") : "No current status available"}
-
-            Rules:
-            1) On the very first response, say exactly one short greeting in ${langName}:
-"${greet}"
-            2) Always respond in the same language as the user's input (${langName} in this session).
-            3) When a user asks about equipment status or issues, refer to the current equipment status above and provide specific guidance based on the available equipment information.
-            4) Keep your answers concise and friendly.
-        `.trim(),
+        instructions,
       }),
     });
 
     if (!resp.ok) {
       const errData = await resp.text();
       console.error(`❌ [OpenAI Error] ${resp.status}: ${errData}`);
-      return res.status(resp.status).json({ error: "OpenAI API failed" });
+      return res
+        .status(resp.status)
+        .json({ error: "OpenAI API failed", detail: errData });
     }
 
     const data = await resp.json();
     console.log("✅ [Server] OpenAI 세션 생성 완료!");
     res.json(data);
   } catch (error: any) {
-    console.error(
-      "❌ [Server Error] OpenAI fetch 중 오류 발생:",
-      error.message
-    );
-    res.status(500).json({ error: "Failed to create OpenAI session" });
+    console.error("❌ [Server Error] OpenAI fetch 중 오류 발생:", error.message);
+    res.status(500).json({ error: "Failed to create OpenAI session", detail: error.message });
   }
 }

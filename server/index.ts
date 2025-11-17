@@ -1,3 +1,26 @@
+// ----------------------
+// 🔥 1) .env 강제 로딩 (ESM 호환 버전)
+// ----------------------
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// ⭐ ESM에서는 __dirname을 직접 만들어야 함
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ⭐ 루트 .env를 항상 찾도록 강제
+const envPath = path.resolve(__dirname, "..", ".env");
+
+console.log("📂 [dotenv] .env 경로:", envPath);
+
+dotenv.config({ path: envPath });
+
+console.log("🔑 [dotenv] OPENAI_API_KEY 존재:", !!process.env.OPENAI_API_KEY);
+
+// ----------------------
+// 기존 코드 시작
+// ----------------------
 import express, { type Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { registerRoutes } from "./routes";
@@ -5,17 +28,18 @@ import { serveStatic, log } from "./vite";
 
 const app = express();
 
-// CORS 설정 - Vercel 프론트엔드 허용
+// CORS 설정
 const allowedOrigins = [
   "https://wellintech.nuguna.ai",
   "http://localhost:5000",
   "http://127.0.0.1:5000",
+  "http://localhost:5001",
+  "http://127.0.0.1:5001",
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // origin이 undefined인 경우 (같은 출처 요청) 또는 허용 목록에 있는 경우
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -70,19 +94,12 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // 백엔드만 배포 - 정적 파일 제공 비활성화
-  // Vercel이 프론트엔드를 담당하므로 Replit은 API만 제공
-  // if (process.env.NODE_ENV === "production") {
-  //   serveStatic(app);
-  // }
-
   const port = parseInt(process.env.PORT || "8080", 10);
 
   server.listen(
     {
       port,
       host: "0.0.0.0",
-      // reusePort: true,
     },
     () => {
       log(`Server is running on http://localhost:${port}`);

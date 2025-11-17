@@ -2,53 +2,42 @@ import { useState, useRef, useEffect } from "react";
 import { Mic, Send, Sparkles } from "lucide-react";
 import { Button } from "./ui/button";
 import { useTranslation } from "react-i18next";
-import { useRealtimeAI } from "../hooks/use-realtime-ai"; // ✅ 추가
+import { useRealtimeAI } from "../hooks/use-realtime-ai";
 
 interface VoiceInputProps {
   onVoiceCommand: (command: string) => void;
   onAIMessage?: (message: string) => void;
-  currentEquipmentState?: {
-    pump1?: number;
-    pump2?: number;
-    pump3?: number;
-    pump4?: number;
-    temperatureSensorA?: number;
-    temperatureSensorB?: number;
-    flowMeter1?: number;
-    flowMeter2?: number;
-    pressureSensorA?: number;
-    pressureSensorB?: number;
-    pressureSensorC?: number;
-    pressureSensorD?: number;
-    valvePosition?: number;
-  };
+  onEquipmentDetail?: (equipmentId: string) => void;
+  currentEquipmentState?: Record<string, number>;
 }
 
-export function VoiceInput({ onVoiceCommand, onAIMessage, currentEquipmentState }: VoiceInputProps) {
+export function VoiceInput({
+  onVoiceCommand,
+  onAIMessage,
+  onEquipmentDetail,
+  currentEquipmentState,
+}: VoiceInputProps) {
   const { t, i18n } = useTranslation("chat");
   const [inputValue, setInputValue] = useState("");
   const [showQuickCommands, setShowQuickCommands] = useState(false);
-  const [volumeBars, setVolumeBars] = useState<number[]>([0.3, 0.5, 0.7, 0.5, 0.3]);
+  const [volumeBars, setVolumeBars] = useState<number[]>([
+    0.3, 0.5, 0.7, 0.5, 0.3,
+  ]);
   const [showEndHint, setShowEndHint] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // ✅ Realtime AI 훅 연결
   const { startCall, endCall, isConnecting, isConnected } = useRealtimeAI();
 
-  // 🎙️ 음성 연결 중 애니메이션 효과
   useEffect(() => {
     if (!isConnected) return;
 
     const interval = setInterval(() => {
-      setVolumeBars((prev) =>
-        prev.map(() => Math.random() * 0.7 + 0.3)
-      );
+      setVolumeBars((prev) => prev.map(() => Math.random() * 0.7 + 0.3));
     }, 150);
 
     return () => clearInterval(interval);
   }, [isConnected]);
 
-  // 🎙️ 음성 연결되었을 때 종료 방법 안내
   useEffect(() => {
     if (isConnected) {
       setShowEndHint(true);
@@ -64,7 +53,7 @@ export function VoiceInput({ onVoiceCommand, onAIMessage, currentEquipmentState 
     t("quickCommand4"),
   ];
 
-  /** 🎙️ 마이크 버튼 클릭 시 - 음성 연결/해제 */
+  /** 🎙️ 마이크 버튼 클릭 */
   const handleMicClick = async () => {
     if (isConnected) {
       endCall();
@@ -74,30 +63,49 @@ export function VoiceInput({ onVoiceCommand, onAIMessage, currentEquipmentState 
     if (isConnecting) return;
 
     try {
-      // 현재 i18n 언어 사용 (ko, en, zh 중 하나)
-      const currentLang = i18n.language || "ko";
-      console.log(`[VoiceInput] Starting AI voice call with language: ${currentLang}`);
+      // ======================================================
+      //  ⭐ 언어 변환 (string → Lang("ko" | "en" | "zh"))
+      // ======================================================
+      const rawLang = i18n.language || "ko"; // "ko" | "ko-KR" | "en-US"
 
-      // 음성 메시지 콜백 전달
-      console.log("[VoiceInput] Setting up message callbacks with equipment state:", currentEquipmentState);
-      await startCall(currentLang, {
-        onUserMessage: (text) => {
-          console.log("[VoiceInput] User speech callback triggered:", text);
-          onVoiceCommand(text);
+      const short = rawLang.slice(0, 2); // "ko", "en", "zh"
+
+      const supportedLangs = ["ko", "en", "zh"] as const;
+      const currentLang = (
+        supportedLangs.includes(short as any) ? short : "ko"
+      ) as "ko" | "en" | "zh";
+
+      console.log(
+        `[VoiceInput] Starting AI voice call with language: ${rawLang} → ${currentLang}`
+      );
+
+      // ======================================================
+      //  ⭐ AI 음성 세션 연결
+      // ======================================================
+      await startCall(
+        currentLang,
+        {
+          onUserMessage: (text) => {
+            console.log("[VoiceInput] User speech:", text);
+            onVoiceCommand(text);
+          },
+          onAIMessage: (text) => {
+            console.log("[VoiceInput] AI speech:", text);
+            onAIMessage?.(text);
+          },
+          onEquipmentDetail: (equipmentId) => {
+            console.log("[VoiceInput] Equipment detail:", equipmentId);
+            onEquipmentDetail?.(equipmentId);
+          },
         },
-        onAIMessage: (text) => {
-          console.log("[VoiceInput] AI response callback triggered:", text);
-          if (onAIMessage) {
-            onAIMessage(text);
-          }
-        },
-      }, currentEquipmentState);
+        currentEquipmentState
+      );
     } catch (err) {
       console.error("[VoiceInput] startCall failed:", err);
     }
   };
 
-  /** 텍스트 명령 전송 */
+  /** 텍스트 명령 보내기 */
   const handleSend = () => {
     if (inputValue.trim()) {
       onVoiceCommand(inputValue);
@@ -106,13 +114,13 @@ export function VoiceInput({ onVoiceCommand, onAIMessage, currentEquipmentState 
     }
   };
 
-  /** 빠른 명령 전송 */
+  /** 빠른 명령 선택 */
   const handleQuickCommand = (command: string) => {
     onVoiceCommand(command);
     setShowQuickCommands(false);
   };
 
-  /** 엔터키 전송 */
+  /** 엔터키 */
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -122,7 +130,7 @@ export function VoiceInput({ onVoiceCommand, onAIMessage, currentEquipmentState 
 
   return (
     <>
-      {/* ✅ 빠른 명령 오버레이 */}
+      {/* ⭐ 빠른 명령 오버레이 */}
       {showQuickCommands && (
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
@@ -153,13 +161,12 @@ export function VoiceInput({ onVoiceCommand, onAIMessage, currentEquipmentState 
         </div>
       )}
 
-      {/* ✅ 하단 음성 입력바 */}
+      {/* ⭐ 하단 음성 입력바 */}
       <div className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur border-t border-slate-800 px-4 py-4 z-30">
         <div className="max-w-6xl mx-auto">
-          {/* 🎤 음성 연결 상태 표시 - 애니메이션 UI (INPUT 위에 표시) */}
+          {/* 연결 중 UI */}
           {isConnecting && (
             <div className="mb-4 flex flex-col items-center gap-3">
-              {/* 음성 연결 중 파동 애니메이션 */}
               <div className="flex items-end justify-center gap-1 h-12">
                 {[...Array(7)].map((_, i) => (
                   <div
@@ -182,9 +189,9 @@ export function VoiceInput({ onVoiceCommand, onAIMessage, currentEquipmentState 
             </div>
           )}
 
+          {/* 연결됨 UI */}
           {isConnected && (
             <div className="mb-4 flex flex-col items-center gap-3">
-              {/* 음성 연결됨 - 사운드바 애니메이션 */}
               <div className="flex items-end justify-center gap-1.5 h-12">
                 {volumeBars.map((height, i) => (
                   <div
@@ -204,7 +211,9 @@ export function VoiceInput({ onVoiceCommand, onAIMessage, currentEquipmentState 
                   </span>
                   {t("common:voiceConnected")}
                 </p>
-                <p className="text-xs text-slate-400 mt-1">AI 음성 안내 중...</p>
+                <p className="text-xs text-slate-400 mt-1">
+                  AI 음성 안내 중...
+                </p>
               </div>
             </div>
           )}
@@ -246,7 +255,6 @@ export function VoiceInput({ onVoiceCommand, onAIMessage, currentEquipmentState 
                     ? "bg-red-500 hover:bg-red-600 animate-pulse"
                     : "bg-slate-700 hover:bg-slate-600"
                 }`}
-                title={isConnected ? "음성 안내 종료 (클릭)" : "음성 안내 시작"}
               >
                 <Mic
                   className={`w-5 h-5 ${
@@ -259,7 +267,6 @@ export function VoiceInput({ onVoiceCommand, onAIMessage, currentEquipmentState 
                 />
               </Button>
 
-              {/* 음성 연결됨 안내 - 모바일/데스크톱 모두 작동 */}
               {isConnected && showEndHint && (
                 <div className="absolute -top-16 left-1/2 -translate-x-1/2 px-4 py-3 bg-red-500 text-white text-sm rounded-lg whitespace-nowrap shadow-lg z-50 font-medium">
                   빨간 버튼을 눌러 종료하세요

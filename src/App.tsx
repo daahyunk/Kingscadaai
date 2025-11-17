@@ -19,6 +19,7 @@ export interface Message {
   timestamp: Date;
   translationKey?: string;
   translationParams?: Record<string, string | number>;
+  equipmentDetailId?: string;
 }
 
 export interface AlarmData {
@@ -41,6 +42,7 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
   const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+  const [equipmentInfo, setEquipmentInfo] = useState<any>(null);
 
   // URL 기반 언어 설정
   useEffect(() => {
@@ -62,6 +64,20 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
       },
     ]);
   }, [i18n.language, t]);
+
+  // 장비 정보 로드
+  useEffect(() => {
+    const loadEquipmentInfo = async () => {
+      try {
+        const response = await fetch("/equipment-info.json");
+        const data = await response.json();
+        setEquipmentInfo(data);
+      } catch (error) {
+        console.error("[App] Failed to load equipment-info.json:", error);
+      }
+    };
+    loadEquipmentInfo();
+  }, []);
 
   const [alarms, setAlarms] = useState<AlarmData[]>([]);
   const [pressure, setPressure] = useState(13.0);
@@ -136,6 +152,11 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
   const triggerAlarm = () => {
     setPressure(15.5);
     setIsAlarmActive(true);
+    // equipmentStatus도 함께 업데이트
+    setEquipmentStatus((prev) => ({
+      ...prev,
+      pump3: 15.5,
+    }));
 
     const alarm: AlarmData = {
       id: "alarm-" + Date.now(),
@@ -164,6 +185,8 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
   };
 
   const handleVoiceCommand = (command: string) => {
+    // 음성 입력: 사용자 메시지만 추가
+    // AI 응답은 onAIMessage (OpenAI)에서 처리됨
     const userMessage: Message = {
       id: "msg-" + Date.now(),
       type: "user",
@@ -172,11 +195,8 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
     };
 
     setMessages((prev) => [...prev, userMessage]);
-
-    // Process command
-    setTimeout(() => {
-      processCommand(command);
-    }, 500);
+    // 음성 입력의 경우 processCommand는 호출하지 않음
+    // OpenAI Realtime API의 응답(onAIMessage)이 자동으로 처리됨
   };
 
   const handleAIMessage = (message: string) => {
@@ -188,6 +208,25 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
     };
 
     setMessages((prev) => [...prev, aiMessage]);
+  };
+
+  const handleEquipmentDetail = (equipmentId: string) => {
+    console.log("[App] handleEquipmentDetail called with:", equipmentId);
+    // 마지막 system 메시지에 equipmentDetailId 추가
+    setMessages((prev) => {
+      const newMessages = [...prev];
+      // 뒤에서부터 가장 최근의 system 메시지를 찾아서 equipmentDetailId 추가
+      for (let i = newMessages.length - 1; i >= 0; i--) {
+        if (newMessages[i].type === "system") {
+          newMessages[i] = {
+            ...newMessages[i],
+            equipmentDetailId: equipmentId,
+          };
+          break;
+        }
+      }
+      return newMessages;
+    });
   };
 
   const processCommand = (command: string) => {
@@ -209,6 +248,10 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
       // Simulate pressure decrease
       setTimeout(() => {
         setPressure(14.2);
+        setEquipmentStatus((prev) => ({
+          ...prev,
+          pump3: 14.2,
+        }));
         setPressureHistory((prev) => [
           ...prev,
           { time: "10:50", pressure: 14.2 },
@@ -217,6 +260,10 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
 
       setTimeout(() => {
         setPressure(13.5);
+        setEquipmentStatus((prev) => ({
+          ...prev,
+          pump3: 13.5,
+        }));
         setPressureHistory((prev) => [
           ...prev,
           { time: "10:55", pressure: 13.5 },
@@ -403,7 +450,12 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
               className="flex-1 overflow-y-auto"
               onScroll={handleScroll}
             >
-              <ChatInterface messages={messages} />
+              <ChatInterface
+                messages={messages}
+                equipmentStatus={equipmentStatus}
+                equipmentInfo={equipmentInfo}
+                pressureHistory={pressureHistory}
+              />
               <div ref={chatEndRef} />
             </div>
           </div>
@@ -415,6 +467,7 @@ export default function App({ initialLanguage = "ko" }: AppProps) {
         <VoiceInput
           onVoiceCommand={handleVoiceCommand}
           onAIMessage={handleAIMessage}
+          onEquipmentDetail={handleEquipmentDetail}
           currentEquipmentState={{
             ...equipmentStatus,
             valvePosition,

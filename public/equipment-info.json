@@ -69,7 +69,7 @@
       ]
     },
     {
-      "id": "temperatureSensorA",
+      "id": "temperature_sensor_a",
       "names": { "ko": "온도 센서 A", "en": "Temperature Sensor A", "zh": "温度传感器 A" },
       "type": "temperature",
       "normalRange": { "min": 15, "max": 35 },
@@ -90,7 +90,7 @@
       ]
     },
     {
-      "id": "temperatureSensorB",
+      "id": "temperature_sensor_b",
       "names": { "ko": "온도 센서 B", "en": "Temperature Sensor B", "zh": "温度传感器 B" },
       "type": "temperature",
       "normalRange": { "min": 15, "max": 35 },
@@ -111,7 +111,7 @@
       ]
     },
     {
-      "id": "flowMeter1",
+      "id": "flow_meter_1",
       "names": { "ko": "유량계 1", "en": "Flow Meter 1", "zh": "流量计 1" },
       "type": "flow",
       "normalRange": { "min": 140, "max": 160 },
@@ -122,7 +122,7 @@
           "action": { "ko": "필터 청소 또는 교체 및 펌프 흡입부 확인", "en": "Clean or replace filter and check pump inlet", "zh": "清洁或更换过滤器并检查泵入口" }
         },
         {
-          "condition": { "ko": "유량 > 180 L/min", "en": "Flow > 180 L/min", "zh": "流량 > 180 L/min" },
+          "condition": { "ko": "유량 > 180 L/min", "en": "Flow > 180 L/min", "zh": "流量 > 180 L/min" },
           "action": { "ko": "배출 밸브 개방도 조정 및 시스템 압력 확인", "en": "Adjust discharge valve opening and verify system pressure", "zh": "调整排放阀开度并验证系统压力" }
         },
         {
@@ -132,7 +132,7 @@
       ]
     },
     {
-      "id": "flowMeter2",
+      "id": "flow_meter_2",
       "names": { "ko": "유량계 2", "en": "Flow Meter 2", "zh": "流量计 2" },
       "type": "flow",
       "normalRange": { "min": 140, "max": 160 },
@@ -153,7 +153,7 @@
       ]
     },
     {
-      "id": "pressureSensorA",
+      "id": "pressure_sensor_a",
       "names": { "ko": "압력 센서 A", "en": "Pressure Sensor A", "zh": "压力传感器 A" },
       "type": "pressure",
       "normalRange": { "min": 10, "max": 15 },
@@ -170,7 +170,7 @@
       ]
     },
     {
-      "id": "pressureSensorB",
+      "id": "pressure_sensor_b",
       "names": { "ko": "압력 센서 B", "en": "Pressure Sensor B", "zh": "压力传感器 B" },
       "type": "pressure",
       "normalRange": { "min": 10, "max": 15 },
@@ -182,12 +182,12 @@
         },
         {
           "condition": { "ko": "압력 < 10 bar", "en": "Pressure < 10 bar", "zh": "压力 < 10 bar" },
-          "action": { "ko": "펌프 압력 설정값 확인 및 압력 센서 교정", "en": "Check pump pressure setting and calibrate pressure sensor", "zh": "检查泵压力设定值并校准压力传감器" }
+          "action": { "ko": "펌프 압력 설정값 확인 및 압력 센서 교정", "en": "Check pump pressure setting and calibrate pressure sensor", "zh": "检查泵压力设定值并校准压力传感器" }
         }
       ]
     },
     {
-      "id": "pressureSensorC",
+      "id": "pressure_sensor_c",
       "names": { "ko": "압력 센서 C", "en": "Pressure Sensor C", "zh": "压力传感器 C" },
       "type": "pressure",
       "normalRange": { "min": 10, "max": 15 },
@@ -204,7 +204,7 @@
       ]
     },
     {
-      "id": "pressureSensorD",
+      "id": "pressure_sensor_d",
       "names": { "ko": "압력 센서 D", "en": "Pressure Sensor D", "zh": "压力传感器 D" },
       "type": "pressure",
       "normalRange": { "min": 10, "max": 15 },
