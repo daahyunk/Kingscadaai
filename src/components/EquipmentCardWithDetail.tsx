@@ -178,7 +178,11 @@ export function EquipmentCardWithDetail({
             <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all duration-500 ${
-                  equipment.status === "alarm" ? "bg-red-500" : "bg-blue-500"
+                  equipment.status === "alarm"
+                    ? "bg-red-500"
+                    : equipment.status === "online"
+                    ? "bg-green-500"
+                    : "bg-slate-500"
                 }`}
                 style={{ width: `${percentage}%` }}
               />

@@ -19,5 +19,6 @@
   "quickCommand1": "Pump 3, analyze recent 1 hour trend",
   "quickCommand2": "Pump 3 supply valve (V-102) reduce by 50%",
   "quickCommand3": "Pump 3 generate situation report",
-  "quickCommand4": "Tell me current Pump 3 status"
+  "quickCommand4": "Tell me current Pump 3 status",
+  "cardClickTip": "💡 Click on a card to view detailed information."
 }

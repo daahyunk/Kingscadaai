@@ -28,7 +28,7 @@ export function MonitoringView({
 }: MonitoringViewProps) {
   const { t } = useTranslation(["monitoring", "common"]);
   const [selectedEquipmentId, setSelectedEquipmentId] = useState<number | null>(
-    3
+    null
   );
   const [filterType, setFilterType] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");

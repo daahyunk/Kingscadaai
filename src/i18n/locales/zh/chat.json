@@ -19,5 +19,6 @@
   "quickCommand1": "泵 3, 分析最近 1 小时的趋势",
   "quickCommand2": "泵 3 的供应阀 (V-102) 减少 50%",
   "quickCommand3": "泵 3 生成情况报告",
-  "quickCommand4": "告诉我泵 3 的当前状态"
+  "quickCommand4": "告诉我泵 3 的当前状态",
+  "cardClickTip": "💡 点击卡片查看详细信息。"
 }

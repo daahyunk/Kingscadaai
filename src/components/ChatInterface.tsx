@@ -98,7 +98,7 @@ export function ChatInterface({
 
                   {/* 안내 팁 */}
                   <p className="text-xs text-slate-400 mb-2 px-1">
-                    💡 카드를 클릭하면 자세한 정보를 확인할 수 있습니다.
+                    {t("cardClickTip")}
                   </p>
 
                   {/* 여러 장비 카드 표시 */}
