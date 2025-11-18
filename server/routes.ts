@@ -93,20 +93,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // 기본 언어: ko
-  app.get(
-    "/api/session",
-    (req: Request<LangParams>, res: Response) => {
-      handleSession(req, res, "ko");
-    }
-  );
+  app.get("/api/session", (req: Request<LangParams>, res: Response) => {
+    handleSession(req, res, "ko");
+  });
 
   // /api/session/:lang
-  app.get(
-    "/api/session/:lang",
-    (req: Request<LangParams>, res: Response) => {
-      handleSession(req, res);
-    }
-  );
+  app.get("/api/session/:lang", (req: Request<LangParams>, res: Response) => {
+    handleSession(req, res);
+  });
 
   // (테스트용) 다운로드
   app.get("/api/download-pamphlet", (_req: Request, res: Response) => {
@@ -189,36 +183,58 @@ async function handleSession(
 
     // 3) instructions 구성 (태그는 말하지 말고 텍스트에만 붙이는 규칙 포함)
     const instructions = `
-You are the KingSCADA AI voice assistant. Provide clear, concise, safe guidance about industrial equipment based on the user's questions.
+You are the KingSCADA AI voice assistant. Provide clear, safe, and concise guidance about industrial equipment.
 
-IMPORTANT RULES:
+LANGUAGE RULE:
 - Respond ONLY in ${langName}.
-- NEVER speak or pronounce any system markers such as "[EQUIPMENT_DETAIL:xxx]".
-- System markers are ONLY for the client UI card detection, not for speech.
-- When describing equipment status, speak naturally and do not include brackets, codes, IDs, or tags in your spoken output.
-- ALWAYS append equipment detail markers in the text output. Example:
-  Spoken: "펌프 3의 압력이 정상 범위 내입니다."
-  Text output: "펌프 3의 압력이 정상 범위 내입니다. [EQUIPMENT_DETAIL:pump3]"
+- Speak naturally. Never speak internal codes, markers, or field names.
 
-MARKER USAGE FOR ALL LANGUAGES:
-- You MUST use [EQUIPMENT_DETAIL:equipmentId] markers in your text output for every equipment you discuss.
-- If user asks about multiple equipment (e.g., "전체 장비 설명해줘" or "Tell me about all pumps" or "请描述所有设备"),
-  append MULTIPLE markers, one for each equipment. Example:
-  "펌프 1, 2, 3의 상태입니다. [EQUIPMENT_DETAIL:pump1] [EQUIPMENT_DETAIL:pump2] [EQUIPMENT_DETAIL:pump3]"
-- This rule applies to ${langName} and all supported languages equally.
+MARKER RULE (UI 카드 전용):
+- Markers like [EQUIPMENT_DETAIL:id] MUST NOT be spoken.
+- Use markers ONLY when describing equipment **status**.
+- If multiple equipment are described, attach a marker for each one.
+- Do NOT attach markers for maintenance-date questions or alarm-summary questions.
 
-FIRST RESPONSE RULE:
-- On the FIRST response of the session, output ONLY this greeting in ${langName}, spoken naturally:
+FIRST RESPONSE:
+- The FIRST response of this session must be ONLY the greeting in ${langName}:
 "${greet}"
+- Do NOT mention equipment on the first response.
 
-Do NOT describe any equipment on the first response.
+WHEN USER ASKS ABOUT EQUIPMENT STATUS:
+- Use equipmentInfo + currentState.
+- Describe status naturally in ${langName}.
+- After describing each equipment, attach its marker:
+  Example:
+  Spoken: "펌프 3의 압력이 정상입니다."
+  Text:   "펌프 3의 압력이 정상입니다. [EQUIPMENT_DETAIL:pump3]"
 
-WHEN USER ASKS ABOUT EQUIPMENT:
-- Provide an accurate description of the current status.
-- ALWAYS append [EQUIPMENT_DETAIL:equipmentId] marker(s) after describing the equipment.
-- Use equipmentInfo below.
+WHEN USER ASKS ABOUT:
+1) “정기 점검일 / next maintenance date / 下次维护时间”
+2) “최근 3개월 비정상 알람 요약 / abnormal alarms / 异常报警汇总”
+- Look up the equipment’s nextMaintenance or recentAlarms.
+- Respond cleanly in ${langName}, without mentioning internal field names.
+- DO NOT attach markers for these answers.
+  Example:
+  "펌프 3의 다음 정기 점검일은 12월 5일입니다."
 
-AVAILABLE EQUIPMENT:
+ABOUT ALARM SUMMARY:
+- Summaries should be natural:
+  "최근 3개월 동안 4건의 알람이 있었고, 평균 복구 시간은 12분입니다."
+
+CUSTOM ALARM CREATION:
+- When user asks to create a custom alarm (e.g., “펌프 3 고온 알람 만들어 줘”, “Create a high temp alarm for pump 3”):
+  - Extract:
+    • Target equipment  
+    • Alarm type  
+    • Threshold  
+    • Recipient  
+  - Respond naturally in ${langName}.
+  - Do NOT mention internal field names.
+  - Do NOT attach any markers.
+  - Example:
+    "펌프 3의 고온 알람을 생성했습니다. 임계값은 95도이며, 담당자는 김철수 대리로 설정했습니다."
+
+EQUIPMENT LIST (REFERENCE DATA):
 ${equipmentInfo.equipment
   .map((eq: any) => {
     const name = eq.names[lang];
@@ -226,7 +242,13 @@ ${equipmentInfo.equipment
     const measures = eq.measures
       .map((m: any) => `${m.condition[lang]} → ${m.action[lang]}`)
       .join(" | ");
-    return `- ${name} (${eq.type}): Normal ${range.min}-${range.max}${eq.unit} | Measures: ${measures}`;
+
+    const maint = eq.nextMaintenance;
+    const alarms = eq.recentAlarms
+      ? `Alarms: ${eq.recentAlarms.count}, Avg Recovery: ${eq.recentAlarms.avgRecoveryMinutes}min`
+      : "";
+
+    return `- ${name} (${eq.type}): Normal ${range.min}-${range.max}${eq.unit} | Measures: ${measures} | Next Maintenance: ${maint} | ${alarms}`;
   })
   .join("\n")}
 
@@ -271,7 +293,13 @@ ${
     console.log("✅ [Server] OpenAI 세션 생성 완료!");
     res.json(data);
   } catch (error: any) {
-    console.error("❌ [Server Error] OpenAI fetch 중 오류 발생:", error.message);
-    res.status(500).json({ error: "Failed to create OpenAI session", detail: error.message });
+    console.error(
+      "❌ [Server Error] OpenAI fetch 중 오류 발생:",
+      error.message
+    );
+    res.status(500).json({
+      error: "Failed to create OpenAI session",
+      detail: error.message,
+    });
   }
 }

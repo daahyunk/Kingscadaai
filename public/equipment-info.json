@@ -6,6 +6,8 @@
       "type": "pump",
       "normalRange": { "min": 10, "max": 15 },
       "unit": "bar",
+      "nextMaintenance": "2025-11-25",
+      "recentAlarms": { "count": 3, "avgRecoveryMinutes": 14 },
       "measures": [
         {
           "condition": { "ko": "압력 > 15 bar", "en": "Pressure > 15 bar", "zh": "压力 > 15 bar" },
@@ -17,12 +19,15 @@
         }
       ]
     },
+
     {
       "id": "pump2",
       "names": { "ko": "펌프 2", "en": "Pump 2", "zh": "泵 2" },
       "type": "pump",
       "normalRange": { "min": 10, "max": 15 },
       "unit": "bar",
+      "nextMaintenance": "2025-11-30",
+      "recentAlarms": { "count": 5, "avgRecoveryMinutes": 11 },
       "measures": [
         {
           "condition": { "ko": "압력 > 15 bar", "en": "Pressure > 15 bar", "zh": "压力 > 15 bar" },
@@ -34,12 +39,15 @@
         }
       ]
     },
+
     {
       "id": "pump3",
       "names": { "ko": "펌프 3", "en": "Pump 3", "zh": "泵 3" },
       "type": "pump",
       "normalRange": { "min": 10, "max": 15 },
       "unit": "bar",
+      "nextMaintenance": "2025-12-05",
+      "recentAlarms": { "count": 4, "avgRecoveryMinutes": 12 },
       "measures": [
         {
           "condition": { "ko": "압력 > 15 bar", "en": "Pressure > 15 bar", "zh": "压力 > 15 bar" },
@@ -51,12 +59,15 @@
         }
       ]
     },
+
     {
       "id": "pump4",
       "names": { "ko": "펌프 4", "en": "Pump 4", "zh": "泵 4" },
       "type": "pump",
       "normalRange": { "min": 10, "max": 15 },
       "unit": "bar",
+      "nextMaintenance": "2025-12-10",
+      "recentAlarms": { "count": 2, "avgRecoveryMinutes": 9 },
       "measures": [
         {
           "condition": { "ko": "압력 > 15 bar", "en": "Pressure > 15 bar", "zh": "压力 > 15 bar" },
@@ -68,12 +79,15 @@
         }
       ]
     },
+
     {
-      "id": "temperature_sensor_a",
+      "id": "temperatureSensorA",
       "names": { "ko": "온도 센서 A", "en": "Temperature Sensor A", "zh": "温度传感器 A" },
       "type": "temperature",
       "normalRange": { "min": 15, "max": 35 },
       "unit": "C",
+      "nextMaintenance": "2025-11-22",
+      "recentAlarms": { "count": 1, "avgRecoveryMinutes": 8 },
       "measures": [
         {
           "condition": { "ko": "온도 > 50C", "en": "Temperature > 50C", "zh": "温度 > 50C" },
@@ -89,12 +103,15 @@
         }
       ]
     },
+
     {
-      "id": "temperature_sensor_b",
+      "id": "temperatureSensorB",
       "names": { "ko": "온도 센서 B", "en": "Temperature Sensor B", "zh": "温度传感器 B" },
       "type": "temperature",
       "normalRange": { "min": 15, "max": 35 },
       "unit": "C",
+      "nextMaintenance": "2025-11-28",
+      "recentAlarms": { "count": 2, "avgRecoveryMinutes": 10 },
       "measures": [
         {
           "condition": { "ko": "온도 > 50C", "en": "Temperature > 50C", "zh": "温度 > 50C" },
@@ -110,12 +127,15 @@
         }
       ]
     },
+
     {
-      "id": "flow_meter_1",
+      "id": "flowMeter1",
       "names": { "ko": "유량계 1", "en": "Flow Meter 1", "zh": "流量计 1" },
       "type": "flow",
       "normalRange": { "min": 140, "max": 160 },
       "unit": "L/min",
+      "nextMaintenance": "2025-12-02",
+      "recentAlarms": { "count": 3, "avgRecoveryMinutes": 15 },
       "measures": [
         {
           "condition": { "ko": "유량 < 100 L/min", "en": "Flow < 100 L/min", "zh": "流量 < 100 L/min" },
@@ -131,12 +151,15 @@
         }
       ]
     },
+
     {
-      "id": "flow_meter_2",
+      "id": "flowMeter2",
       "names": { "ko": "유량계 2", "en": "Flow Meter 2", "zh": "流量计 2" },
       "type": "flow",
       "normalRange": { "min": 140, "max": 160 },
       "unit": "L/min",
+      "nextMaintenance": "2025-11-18",
+      "recentAlarms": { "count": 1, "avgRecoveryMinutes": 7 },
       "measures": [
         {
           "condition": { "ko": "유량 < 100 L/min", "en": "Flow < 100 L/min", "zh": "流量 < 100 L/min" },
@@ -152,12 +175,15 @@
         }
       ]
     },
+
     {
-      "id": "pressure_sensor_a",
+      "id": "pressureSensorA",
       "names": { "ko": "압력 센서 A", "en": "Pressure Sensor A", "zh": "压力传感器 A" },
       "type": "pressure",
       "normalRange": { "min": 10, "max": 15 },
       "unit": "bar",
+      "nextMaintenance": "2025-12-15",
+      "recentAlarms": { "count": 4, "avgRecoveryMinutes": 13 },
       "measures": [
         {
           "condition": { "ko": "압력 > 15 bar", "en": "Pressure > 15 bar", "zh": "压力 > 15 bar" },
@@ -169,12 +195,15 @@
         }
       ]
     },
+
     {
-      "id": "pressure_sensor_b",
+      "id": "pressureSensorB",
       "names": { "ko": "압력 센서 B", "en": "Pressure Sensor B", "zh": "压力传感器 B" },
       "type": "pressure",
       "normalRange": { "min": 10, "max": 15 },
       "unit": "bar",
+      "nextMaintenance": "2025-12-20",
+      "recentAlarms": { "count": 3, "avgRecoveryMinutes": 10 },
       "measures": [
         {
           "condition": { "ko": "압력 > 15 bar", "en": "Pressure > 15 bar", "zh": "压力 > 15 bar" },
@@ -186,12 +215,15 @@
         }
       ]
     },
+
     {
-      "id": "pressure_sensor_c",
+      "id": "pressureSensorC",
       "names": { "ko": "압력 센서 C", "en": "Pressure Sensor C", "zh": "压力传感器 C" },
       "type": "pressure",
       "normalRange": { "min": 10, "max": 15 },
       "unit": "bar",
+      "nextMaintenance": "2025-12-27",
+      "recentAlarms": { "count": 2, "avgRecoveryMinutes": 9 },
       "measures": [
         {
           "condition": { "ko": "압력 > 15 bar", "en": "Pressure > 15 bar", "zh": "压力 > 15 bar" },
@@ -203,12 +235,15 @@
         }
       ]
     },
+
     {
-      "id": "pressure_sensor_d",
+      "id": "pressureSensorD",
       "names": { "ko": "압력 센서 D", "en": "Pressure Sensor D", "zh": "压力传感器 D" },
       "type": "pressure",
       "normalRange": { "min": 10, "max": 15 },
       "unit": "bar",
+      "nextMaintenance": "2025-12-30",
+      "recentAlarms": { "count": 1, "avgRecoveryMinutes": 6 },
       "measures": [
         {
           "condition": { "ko": "압력 > 15 bar", "en": "Pressure > 15 bar", "zh": "压力 > 15 bar" },

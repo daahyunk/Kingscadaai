@@ -23,7 +23,6 @@ export function VoiceInput({
   const [volumeBars, setVolumeBars] = useState<number[]>([
     0.3, 0.5, 0.7, 0.5, 0.3,
   ]);
-  const [showEndHint, setShowEndHint] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { startCall, endCall, isConnecting, isConnected } = useRealtimeAI();
@@ -36,14 +35,6 @@ export function VoiceInput({
     }, 150);
 
     return () => clearInterval(interval);
-  }, [isConnected]);
-
-  useEffect(() => {
-    if (isConnected) {
-      setShowEndHint(true);
-      const timer = setTimeout(() => setShowEndHint(false), 4000);
-      return () => clearTimeout(timer);
-    }
   }, [isConnected]);
 
   const quickCommands = [
@@ -255,13 +246,6 @@ export function VoiceInput({
                   }`}
                 />
               </Button>
-
-              {isConnected && showEndHint && (
-                <div className="absolute -top-16 left-1/2 -translate-x-1/2 px-4 py-3 bg-red-500 text-white text-sm rounded-lg whitespace-nowrap shadow-lg z-50 font-medium">
-                  빨간 버튼을 눌러 종료하세요
-                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 border-4 border-transparent border-t-red-500"></div>
-                </div>
-              )}
             </div>
           </div>
         </div>
